@@ -11,6 +11,7 @@ export type VideoMetadata = {
 };
 
 // Helper function to safely stringify objects
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 const safeStringify = (obj: any) => {
   try {
     return JSON.stringify(obj, null, 2);
@@ -46,8 +47,11 @@ export const ourFileRouter = {
       
       // Extract metadata with fallbacks
       const metadata = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         uploaderName: (formData as any).uploaderName || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         contactInfo: (formData as any).contactInfo || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         description: (formData as any).description || ""
       };
       

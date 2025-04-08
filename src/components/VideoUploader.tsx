@@ -21,6 +21,7 @@ interface SelectedFile {
 }
 
 // Helper function to safely stringify objects
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const safeStringify = (obj: any) => {
   try {
     return JSON.stringify(obj, null, 2);
