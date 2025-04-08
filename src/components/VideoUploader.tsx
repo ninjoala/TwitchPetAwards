@@ -22,6 +22,7 @@ interface SubmissionData {
 
 export default function VideoUploader() {
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -132,6 +133,14 @@ export default function VideoUploader() {
       </div>
 
       <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200">
+        {selectedFile && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-lg text-green-700 flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span>Selected video: {selectedFile}</span>
+          </div>
+        )}
         <UploadDropzone<OurFileRouter, "videoUploader">
           endpoint="videoUploader"
           onClientUploadComplete={(res) => {
@@ -167,6 +176,9 @@ export default function VideoUploader() {
             const newFilename = generateUniqueFilename(originalFile.name);
             console.log("[DROP] Original filename:", originalFile.name);
             console.log("[DROP] New filename:", newFilename);
+
+            // Set the selected file name
+            setSelectedFile(originalFile.name);
 
             // Create a new file with the generated name
             const renamedFile = new File([originalFile], newFilename, {
