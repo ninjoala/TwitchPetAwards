@@ -4,7 +4,7 @@ const f = createUploadthing();
 
 export const ourFileRouter = {
   videoUploader: f({ video: { maxFileSize: "512MB", maxFileCount: 1 } })
-    .middleware(async ({ req }) => {
+    .middleware(async () => {
       console.log("[MIDDLEWARE] Request received");
       return {};
     })
@@ -20,7 +20,7 @@ export const ourFileRouter = {
     }),
     
   metadataUploader: f({ "application/json": { maxFileSize: "1MB", maxFileCount: 1 } })
-    .middleware(async ({ req }) => {
+    .middleware(async () => {
       console.log("[MIDDLEWARE] Metadata request received");
       return {};
     })
