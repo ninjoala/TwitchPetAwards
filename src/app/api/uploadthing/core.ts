@@ -8,6 +8,8 @@ export type VideoMetadata = {
   uploaderName: string;
   contactInfo: string;
   description: string;
+  // Store reference to the video filename
+  videoFileName: string;
 };
 
 // Helper function to safely stringify objects
@@ -23,7 +25,10 @@ const safeStringify = (obj: any) => {
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
   // Define videoUploader route
-  videoUploader: f({ video: { maxFileSize: "512MB", maxFileCount: 1 } })
+  videoUploader: f({
+    video: { maxFileSize: "512MB", maxFileCount: 1 },
+    "application/json": { maxFileSize: "1MB", maxFileCount: 10 }
+  })
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
       // This code runs on your server before upload
@@ -52,7 +57,9 @@ export const ourFileRouter = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         contactInfo: (formData as any).contactInfo || "",
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        description: (formData as any).description || ""
+        description: (formData as any).description || "",
+        // Will be filled in onUploadComplete
+        videoFileName: ""
       };
       
       // Return metadata for use in onUploadComplete
@@ -62,19 +69,39 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("[UPLOAD_COMPLETE] File uploaded:", file.name);
-      console.log("[UPLOAD_COMPLETE] Metadata:", metadata);
       
-      // Return file details and metadata
-      return {
-        name: file.name,
-        url: file.url,
-        size: file.size,
-        type: file.type,
-        uploaderName: metadata.uploaderName,
-        contactInfo: metadata.contactInfo,
-        description: metadata.description,
-        uploadedAt: new Date().toISOString()
-      };
+      // Add the video filename to metadata if this is a video file
+      // Skip additional processing for JSON files
+      if (!file.name.endsWith('.json')) {
+        const updatedMetadata = {
+          ...metadata,
+          videoFileName: file.name
+        };
+        
+        console.log("[UPLOAD_COMPLETE] Video metadata:", updatedMetadata);
+        
+        // Return file details with metadata for non-JSON files
+        return {
+          name: file.name,
+          url: file.url,
+          size: file.size,
+          type: file.type,
+          uploaderName: updatedMetadata.uploaderName,
+          contactInfo: updatedMetadata.contactInfo,
+          description: updatedMetadata.description,
+          uploadedAt: new Date().toISOString()
+        };
+      } else {
+        // For JSON files, just return the basic info
+        console.log("[UPLOAD_COMPLETE] Metadata file uploaded:", file.name);
+        return {
+          name: file.name,
+          url: file.url,
+          size: file.size,
+          type: file.type,
+          uploadedAt: new Date().toISOString()
+        };
+      }
     }),
 } satisfies FileRouter;
 

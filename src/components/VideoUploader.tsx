@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { UploadDropzone } from "@uploadthing/react";
 import type { OurFileRouter } from "@/app/api/uploadthing/core";
+import { uploadFiles } from "@/utils/uploadthing";
 
 interface UploadedFile {
   name: string;
@@ -41,6 +42,8 @@ export default function VideoUploader() {
   const [showUploader, setShowUploader] = useState(false);
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [metadataJson, setMetadataJson] = useState<string | null>(null);
+  const videoFileRef = useRef<File | null>(null);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -53,6 +56,11 @@ export default function VideoUploader() {
       newFormData.contactInfo && 
       newFormData.description)
     );
+    
+    // Update the metadata JSON whenever form data changes
+    if (selectedFile) {
+      updateMetadataJson(newFormData, selectedFile);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -69,6 +77,35 @@ export default function VideoUploader() {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+  
+  const updateMetadataJson = (formData: any, file: SelectedFile) => {
+    const metadata = {
+      uploaderName: formData.uploaderName,
+      contactInfo: formData.contactInfo,
+      description: formData.description,
+      videoFileName: file.name,
+      fileSize: file.size,
+      uploadedAt: new Date().toISOString()
+    };
+    
+    setMetadataJson(JSON.stringify(metadata, null, 2));
+  };
+  
+  const createMetadataFile = (videoFileName: string): File => {
+    if (!metadataJson) {
+      throw new Error("Metadata JSON is not available");
+    }
+    
+    // Create a new file with the metadata JSON
+    const metadataBlob = new Blob([metadataJson], { type: 'application/json' });
+    const metadataFile = new File(
+      [metadataBlob], 
+      `${videoFileName}.metadata.json`, 
+      { type: 'application/json' }
+    );
+    
+    return metadataFile;
   };
 
   return (
@@ -153,6 +190,18 @@ export default function VideoUploader() {
                         <p>Contact: {formData.contactInfo}</p>
                         <p>Description: {formData.description}</p>
                       </div>
+                      
+                      {metadataJson && (
+                        <div className="mt-3">
+                          <p className="text-sm font-medium text-gray-700 mb-1">Metadata JSON:</p>
+                          <pre className="text-xs bg-gray-800 text-green-400 p-2 rounded text-left overflow-auto max-h-32">
+                            {metadataJson}
+                          </pre>
+                          <p className="text-xs text-gray-600 mt-1">
+                            This JSON file will be uploaded alongside your video.
+                          </p>
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-3">
                       <button
@@ -161,6 +210,8 @@ export default function VideoUploader() {
                         onClick={() => {
                           console.log("[FILE] Resetting file selection");
                           setSelectedFile(null);
+                          setMetadataJson(null);
+                          videoFileRef.current = null;
                         }}
                         className="text-sm text-gray-600 hover:text-gray-900 underline"
                       >
@@ -174,17 +225,50 @@ export default function VideoUploader() {
                             ? 'bg-gray-400 cursor-not-allowed' 
                             : 'bg-green-500 hover:bg-green-600 transition-colors'
                         }`}
-                        onClick={() => {
-                          console.log("[UPLOAD] Starting upload process");
-                          setIsUploading(true);
+                        onClick={async () => {
+                          if (!selectedFile || !videoFileRef.current) {
+                            alert("No video file selected");
+                            return;
+                          }
                           
-                          // Find and click the upload button
-                          const uploadButton = document.querySelector('[data-ut-element="button"]') as HTMLButtonElement;
-                          if (uploadButton) {
-                            console.log("[UPLOAD] Found upload button, clicking");
-                            uploadButton.click();
-                          } else {
-                            console.error("[UPLOAD] Upload button not found");
+                          try {
+                            console.log("[UPLOAD] Starting upload process");
+                            console.log("[METADATA] Metadata JSON:", metadataJson);
+                            setIsUploading(true);
+                            
+                            // Create metadata JSON file
+                            const metadataFile = createMetadataFile(selectedFile.name);
+                            console.log("[METADATA] Created metadata file:", metadataFile.name);
+                            
+                            // Upload both video and metadata files
+                            const res = await uploadFiles({
+                              endpoint: "videoUploader",
+                              files: [videoFileRef.current, metadataFile],
+                              input: formData
+                            });
+                            
+                            console.log("[UPLOAD] Completed with response:", safeStringify(res));
+                            
+                            if (res) {
+                              // Handle the response similar to onClientUploadComplete
+                              const files = res.map(file => file as unknown as UploadedFile);
+                              setUploadedFiles((prev) => [...prev, ...files]);
+                              alert("Upload Completed Successfully!");
+                              
+                              setFormData({
+                                uploaderName: "",
+                                contactInfo: "",
+                                description: ""
+                              });
+                              setIsFormValid(false);
+                              setShowUploader(false);
+                              setSelectedFile(null);
+                              setIsUploading(false);
+                              videoFileRef.current = null;
+                            }
+                          } catch (error) {
+                            console.error("[UPLOAD] Error:", error);
+                            alert(`ERROR: ${error instanceof Error ? error.message : "Unknown error"}`);
                             setIsUploading(false);
                           }
                         }}
@@ -213,6 +297,7 @@ export default function VideoUploader() {
                       setShowUploader(false);
                       setSelectedFile(null);
                       setIsUploading(false);
+                      videoFileRef.current = null;
                     }
                   }}
                   onUploadError={(error: Error) => {
@@ -237,14 +322,18 @@ export default function VideoUploader() {
                       lastModified: file.lastModified
                     }));
                     if (file) {
-                      console.log("[FILE] Setting selected file:", {
+                      const selectedFileInfo = {
                         name: file.name,
                         size: file.size
-                      });
-                      setSelectedFile({
-                        name: file.name,
-                        size: file.size
-                      });
+                      };
+                      console.log("[FILE] Setting selected file:", selectedFileInfo);
+                      setSelectedFile(selectedFileInfo);
+                      
+                      // Save the actual File object for later upload
+                      videoFileRef.current = file;
+                      
+                      // Generate metadata JSON when file is selected
+                      updateMetadataJson(formData, selectedFileInfo);
                     }
                   }}
                   appearance={{
