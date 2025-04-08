@@ -3,6 +3,7 @@
 import { UploadDropzone } from "@uploadthing/react";
 import { type OurFileRouter } from "@/app/api/uploadthing/core";
 import { useState } from "react";
+import { useUploadThing } from "@/utils/uploadthing";
 
 // Function to generate a unique filename
 function generateUniqueFilename(originalFilename: string): string {
@@ -12,6 +13,13 @@ function generateUniqueFilename(originalFilename: string): string {
   return `${timestamp}-${random}.${extension}`;
 }
 
+interface SubmissionData {
+  name: string;
+  email: string;
+  description: string;
+  submittedAt: string;
+}
+
 export default function VideoUploader() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [formData, setFormData] = useState({
@@ -19,7 +27,18 @@ export default function VideoUploader() {
     email: '',
     description: ''
   });
-  const [submittedData, setSubmittedData] = useState<null | typeof formData>(null);
+  const [savedSubmission, setSavedSubmission] = useState<SubmissionData | null>(null);
+  
+  // Initialize the upload hook for metadata
+  const { startUpload: startMetadataUpload } = useUploadThing("metadataUploader", {
+    onUploadProgress: () => {}, // We don't show metadata upload progress
+    onClientUploadComplete: () => {
+      console.log('[METADATA] Upload completed successfully');
+    },
+    onUploadError: (error) => {
+      console.error('[METADATA] Upload failed:', error);
+    }
+  });
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -30,8 +49,37 @@ export default function VideoUploader() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmittedData(formData);
-    console.log('Form submitted with data:', JSON.stringify(formData, null, 2));
+    const submission: SubmissionData = {
+      ...formData,
+      submittedAt: new Date().toISOString()
+    };
+    setSavedSubmission(submission);
+    console.log('Submission saved:', JSON.stringify(submission, null, 2));
+  };
+
+  // Function to upload metadata in the background
+  const uploadMetadata = async (metadata: SubmissionData, videoFilename: string) => {
+    try {
+      // Create a JSON blob with the metadata
+      const metadataBlob = new Blob([JSON.stringify({
+        ...metadata,
+        associatedVideo: videoFilename,
+      })], { type: 'application/json' });
+
+      // Create a File object from the blob
+      const metadataFile = new File(
+        [metadataBlob],
+        `${videoFilename}.metadata.json`,
+        { type: 'application/json' }
+      );
+
+      // Upload the metadata file using the hook
+      await startMetadataUpload([metadataFile]);
+    } catch (error) {
+      console.error('[METADATA] Upload failed:', error);
+      // We don't alert the user about metadata upload failures
+      // to maintain the original user experience
+    }
   };
 
   return (
@@ -89,7 +137,10 @@ export default function VideoUploader() {
           onClientUploadComplete={(res) => {
             console.log("[UPLOAD] Upload completed:", res);
             setUploadProgress(0);
-            if (res && res[0]) {
+            // If we have both the video upload result and saved submission data
+            if (res && res[0] && savedSubmission) {
+              // Upload the metadata in the background
+              uploadMetadata(savedSubmission, res[0].name);
               alert(`Upload completed!\nFile name: ${res[0].name}`);
             } else {
               alert("Upload completed!");
