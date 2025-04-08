@@ -152,6 +152,9 @@ export default function VideoUploader() {
                 // Upload the metadata in the background
                 uploadMetadata(savedSubmission, res[0].name);
                 alert(`Upload completed!\nFile name: ${res[0].name}`);
+                // Clear the saved submission after successful upload
+                setSavedSubmission(null);
+                setSelectedFile(null);
               } else {
                 alert("Upload completed!");
               }
