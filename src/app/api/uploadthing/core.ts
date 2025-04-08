@@ -4,55 +4,32 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 const f = createUploadthing();
 
 // Define metadata type
-export type VideoMetadata = {
+interface VideoMetadata {
   uploaderName: string;
   contactInfo: string;
   description: string;
-};
-
-// Helper function to safely stringify objects
-const safeStringify = (obj: any) => {
-  try {
-    return JSON.stringify(obj, null, 2);
-  } catch (error) {
-    return `[Error stringifying object: ${error}]`;
-  }
-};
+}
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
   // Define videoUploader route
-  videoUploader: f({ video: { maxFileSize: "512MB", maxFileCount: 1 } })
+  videoUploader: f({ video: { maxFileSize: "32MB" } })
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
       // This code runs on your server before upload
       console.log("[MIDDLEWARE] Request received");
       
       // Read request body
-      let formData = {};
-      
-      try {
-        // Try to parse the body
-        if (typeof req.body === 'string') {
-          formData = JSON.parse(req.body);
-        } else if (req.body && typeof req.body === 'object') {
-          formData = req.body;
-        }
-      } catch (error) {
-        console.error("[MIDDLEWARE] Error parsing body:", error);
-      }
+      const formData = await req.json() as VideoMetadata;
       
       console.log("[MIDDLEWARE] Form data:", formData);
       
-      // Extract metadata with fallbacks
-      const metadata = {
-        uploaderName: (formData as any).uploaderName || "",
-        contactInfo: (formData as any).contactInfo || "",
-        description: (formData as any).description || ""
-      };
-      
       // Return metadata for use in onUploadComplete
-      return metadata;
+      return {
+        uploaderName: formData.uploaderName || "",
+        contactInfo: formData.contactInfo || "",
+        description: formData.description || ""
+      };
     })
     // Define onUploadComplete - executed on successful upload
     .onUploadComplete(async ({ metadata, file }) => {
