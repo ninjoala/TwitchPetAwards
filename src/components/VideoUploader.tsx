@@ -21,7 +21,7 @@ interface SelectedFile {
 }
 
 // Helper function to safely stringify objects
-const safeStringify = (obj: unknown): string => {
+const safeStringify = (obj: any) => {
   try {
     return JSON.stringify(obj, null, 2);
   } catch (error) {
