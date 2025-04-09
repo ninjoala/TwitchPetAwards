@@ -291,9 +291,10 @@ export default function VideoUploader() {
                   setSavedSubmission(null);
                   setSelectedFile(null);
                   setSubmissionType(null);
-                } catch (error: any) {
+                } catch (error: Error | unknown) {
                   console.error("[UPLOAD] Error in upload completion:", error);
-                  alert(`Failed to complete the upload process. Please try again. Error: ${error?.message || 'Unknown error'}`);
+                  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                  alert(`Failed to complete the upload process. Please try again. Error: ${errorMessage}`);
                 }
               }}
               onUploadError={(error: Error) => {
