@@ -63,26 +63,42 @@ export default async function DashboardPage() {
                     metadata.map((entry) => (
                       <div key={entry.fileInfo.id} className="bg-gray-50 p-6 rounded-lg">
                         <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-medium text-gray-900">{entry.name}</h3>
-                            <p className="mt-1 text-gray-500">{entry.email}</p>
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Submitter Name</span>
+                              <h3 className="text-lg font-medium text-gray-900">{entry.name}</h3>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Email</span>
+                              <p className="text-gray-700">{entry.email}</p>
+                            </div>
                           </div>
-                          <span className="text-sm text-gray-500">
-                            {new Date(entry.submittedAt).toLocaleDateString()}
-                          </span>
+                          <div>
+                            <span className="text-sm font-medium text-gray-500">Submitted On</span>
+                            <p className="text-sm text-gray-700">
+                              {new Date(entry.submittedAt).toLocaleDateString()}
+                            </p>
+                          </div>
                         </div>
-                        <p className="mt-3 text-gray-700">{entry.description}</p>
-                        <div className="mt-4 flex items-center justify-between text-sm">
-                          <span className="text-gray-500">
-                            Associated Video: {entry.associatedVideo}
-                          </span>
-                          <span className={`px-2 py-1 rounded-full ${
-                            entry.fileInfo.status === 'Uploaded' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {entry.fileInfo.status}
-                          </span>
+                        <div className="mt-4">
+                          <span className="text-sm font-medium text-gray-500">Description</span>
+                          <p className="mt-1 text-gray-700">{entry.description}</p>
+                        </div>
+                        <div className="mt-4 flex items-center justify-between">
+                          <div>
+                            <span className="text-sm font-medium text-gray-500">Associated Video</span>
+                            <p className="mt-1 text-gray-700">{entry.associatedVideo}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm font-medium text-gray-500">Status</span>
+                            <p className={`mt-1 px-2 py-1 rounded-full text-sm ${
+                              entry.fileInfo.status === 'Uploaded' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {entry.fileInfo.status}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))
