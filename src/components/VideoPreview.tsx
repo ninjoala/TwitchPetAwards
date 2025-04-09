@@ -7,14 +7,24 @@ interface VideoPreviewProps {
   videoName: string;
   videoTitle: string;
   videoUrl: string;
+  isLinkSubmission?: boolean;
 }
 
-export default function VideoPreview({ videoName, videoTitle, videoUrl }: VideoPreviewProps) {
+export default function VideoPreview({ videoName, videoTitle, videoUrl, isLinkSubmission }: VideoPreviewProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [thumbnail, setThumbnail] = useState<string>('');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
+    console.log('[VideoPreview] Props received:', {
+      videoName,
+      videoTitle,
+      videoUrl,
+      isLinkSubmission
+    });
+
+    if (isLinkSubmission) return; // Skip thumbnail generation for link submissions
+    
     // Create a video element to generate thumbnail
     const video = document.createElement('video');
     video.src = videoUrl;
@@ -37,15 +47,33 @@ export default function VideoPreview({ videoName, videoTitle, videoUrl }: VideoP
       }
       video.remove(); // Clean up
     };
-  }, [videoUrl]);
+  }, [videoUrl, isLinkSubmission, videoName, videoTitle]);
+
+  if (isLinkSubmission) {
+    console.log('[VideoPreview] Rendering link submission with URL:', videoUrl);
+    return (
+      <div className="space-y-2">
+        <div className="flex items-baseline gap-2">
+          <span className="text-sm font-medium text-gray-500">Video URL:</span>
+          <a
+            href={videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            Open Video URL
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <div className="space-y-2">
-        <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium text-gray-500">Video Title:</span>
-          <span className="text-sm text-gray-900">{videoTitle}</span>
-        </div>
         <button
           onClick={() => setIsOpen(true)}
           className="relative group overflow-hidden rounded-lg hover:ring-2 hover:ring-blue-500 transition-all duration-200"

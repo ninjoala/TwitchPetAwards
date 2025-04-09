@@ -6,9 +6,28 @@ const utapi = new UTApi();
 export async function POST(req: Request) {
   try {
     const metadata = await req.json();
+    console.log('[METADATA API] Received metadata:', {
+      associatedVideo: metadata.associatedVideo,
+      videoTitle: metadata.videoTitle,
+      videoUrl: metadata.videoUrl,
+      isLink: metadata.associatedVideo?.startsWith('link_')
+    });
+    
+    // Ensure we preserve the videoUrl for link submissions
+    const metadataToSave = {
+      ...metadata,
+      videoUrl: metadata.videoUrl || undefined // Explicitly preserve videoUrl
+    };
+    
+    console.log('[METADATA API] Saving metadata:', {
+      associatedVideo: metadataToSave.associatedVideo,
+      videoTitle: metadataToSave.videoTitle,
+      videoUrl: metadataToSave.videoUrl,
+      isLink: metadataToSave.associatedVideo?.startsWith('link_')
+    });
     
     // Create a JSON string from the metadata
-    const jsonString = JSON.stringify(metadata, null, 2);
+    const jsonString = JSON.stringify(metadataToSave, null, 2);
     
     // Create a Blob and convert it to a File object
     const file = new File([jsonString], `${metadata.associatedVideo}.metadata.json`, {
@@ -22,6 +41,8 @@ export async function POST(req: Request) {
     if (!uploadResponse.data) {
       throw new Error('Failed to upload metadata');
     }
+
+    console.log('[METADATA API] Upload successful:', uploadResponse.data);
 
     return NextResponse.json({
       success: true,

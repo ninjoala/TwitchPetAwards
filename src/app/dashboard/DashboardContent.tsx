@@ -42,6 +42,32 @@ export default function DashboardContent({
   const [loadingFavorite, setLoadingFavorite] = useState<string | null>(null);
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
+  // Debug logging for metadata changes
+  useEffect(() => {
+    console.log('[DEBUG] Initial metadata:', initialMetadata.map(entry => ({
+      id: entry.fileInfo.id,
+      videoTitle: entry.videoTitle,
+      associatedVideo: entry.associatedVideo,
+      videoUrl: entry.videoUrl,
+      isLink: entry.associatedVideo.startsWith('link_')
+    })));
+  }, [initialMetadata]);
+
+  // Debug logging for filtered metadata
+  useEffect(() => {
+    const filtered = showFavoritesOnly
+      ? metadata.filter(entry => favoritedItems.has(entry.fileInfo.id))
+      : metadata;
+    
+    console.log('[DEBUG] Filtered metadata:', filtered.map(entry => ({
+      id: entry.fileInfo.id,
+      videoTitle: entry.videoTitle,
+      associatedVideo: entry.associatedVideo,
+      videoUrl: entry.videoUrl,
+      isLink: entry.associatedVideo.startsWith('link_')
+    })));
+  }, [metadata, showFavoritesOnly, favoritedItems]);
+
   // Fetch favorites when component mounts
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -234,7 +260,12 @@ export default function DashboardContent({
                           <div className="flex justify-between items-start">
                             <div>
                               <span className="text-sm font-medium text-gray-500">Video Title</span>
-                              <p className="mt-1 text-gray-900 font-medium">{entry.videoTitle}</p>
+                              <p className="mt-1 text-gray-900 font-medium">
+                                {entry.videoTitle}
+                                <span className="ml-2 text-red-600 font-bold text-sm">
+                                  {entry.videoUrl ? '[UPLOADED VIDEO]' : '[URL SUBMISSION]'}
+                                </span>
+                              </p>
                             </div>
                             <button
                               onClick={() => handleFavorite(entry)}
@@ -289,14 +320,29 @@ export default function DashboardContent({
 
                           {/* Video Preview */}
                           <div>
-                            <span className="text-sm font-medium text-gray-500">Video Preview</span>
+                            <span className="text-sm font-medium text-gray-500">Video Link</span>
                             <div className="mt-1">
-                              <p className="text-gray-700 text-sm mb-2">{entry.associatedVideo}</p>
+                              {!entry.videoUrl && (
+                                <p className="text-gray-700 text-sm mb-2">
+                                  <a 
+                                    href={entry.fileInfo.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                                  >
+                                    <span>{entry.fileInfo.url}</span>
+                                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </a>
+                                </p>
+                              )}
                               {entry.videoUrl && (
                                 <VideoPreview 
                                   videoName={entry.associatedVideo}
                                   videoTitle={entry.videoTitle}
                                   videoUrl={entry.videoUrl}
+                                  isLinkSubmission={false}
                                 />
                               )}
                             </div>
