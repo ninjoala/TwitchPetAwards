@@ -1,23 +1,31 @@
-# Use the official Node.js image as the base image
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS builder
 
-# Set the working directory in the container
+# Declare Clerk build arguments
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ARG CLERK_SECRET_KEY
+
 WORKDIR /app
-
-# Copy package.json and package-lock.json (if it exists)
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
-
-# Copy the rest of the application code
 COPY . .
 
-# Build the Next.js application
-RUN npm run build
-   
-# Expose the port that the Next.js app will run on
-EXPOSE 3000
+# Pass Clerk keys during build time
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+ENV CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
 
-# Start the Next.js production server
+RUN npm run build
+
+# Production stage
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+
+# Runtime environment variables will be provided by Dokploy
+# No need to set them here as they're already in Dokploy's Environment Variables
+
+EXPOSE 3000
 CMD ["npm", "start"] 
