@@ -5,10 +5,19 @@ FROM node:18-alpine AS builder
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ARG CLERK_SECRET_KEY
 
-# Debug: Print build arguments (careful: don't log secret key in production)
-RUN echo "Checking build arguments..."
-RUN echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:+set}"
-RUN echo "CLERK_SECRET_KEY is ${CLERK_SECRET_KEY:+set}"
+# Debug: Print status without showing values
+RUN echo "==================== DEBUGGING BUILD ARGS ===================" && \
+    if [ -z "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" ]; then \
+        echo "❌ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is MISSING"; \
+    else \
+        echo "✅ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is SET"; \
+    fi && \
+    if [ -z "$CLERK_SECRET_KEY" ]; then \
+        echo "❌ CLERK_SECRET_KEY is MISSING"; \
+    else \
+        echo "✅ CLERK_SECRET_KEY is SET"; \
+    fi && \
+    echo "========================================================"
 
 WORKDIR /app
 COPY package*.json ./
@@ -28,17 +37,29 @@ RUN ls -la
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
 ENV CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
 
-# Debug: Print environment variables (careful with secrets)
-RUN echo "Checking environment variables..."
-RUN echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:+set}"
-RUN echo "CLERK_SECRET_KEY is ${CLERK_SECRET_KEY:+set}"
+# Debug: Print env var status without showing values
+RUN echo "==================== DEBUGGING ENV VARS ===================" && \
+    if [ -z "$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" ]; then \
+        echo "❌ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is MISSING"; \
+    else \
+        echo "✅ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is SET"; \
+    fi && \
+    if [ -z "$CLERK_SECRET_KEY" ]; then \
+        echo "❌ CLERK_SECRET_KEY is MISSING"; \
+    else \
+        echo "✅ CLERK_SECRET_KEY is SET"; \
+    fi && \
+    echo "========================================================"
 
 # Debug: Add more verbose npm logging
 ENV NPM_CONFIG_LOGLEVEL=verbose
 
 # Add debugging to build process
 RUN echo "Starting build process..."
-RUN npm run build || (echo "Build failed. Environment state:" && printenv && exit 1)
+RUN npm run build || (echo "==================== BUILD FAILED ===================" && \
+    echo "❌ Build failed - Check if Clerk keys are properly set in Dokploy build arguments" && \
+    echo "=======================================================" && \
+    exit 1)
 
 # Production stage
 FROM node:18-alpine
