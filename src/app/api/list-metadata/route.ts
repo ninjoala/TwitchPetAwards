@@ -18,6 +18,7 @@ interface MetadataContent {
   description: string;
   submittedAt: string;
   associatedVideo: string;
+  videoTitle: string;
   videoUrl?: string;
   fileInfo: FileInfo;
 }

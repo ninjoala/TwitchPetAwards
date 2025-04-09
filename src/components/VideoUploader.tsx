@@ -18,6 +18,7 @@ interface SubmissionData {
   email: string;
   description: string;
   submittedAt: string;
+  videoTitle: string;
 }
 
 export default function VideoUploader() {
@@ -26,7 +27,8 @@ export default function VideoUploader() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    description: ''
+    description: '',
+    videoTitle: ''
   });
   const [savedSubmission, setSavedSubmission] = useState<SubmissionData | null>(null);
   
@@ -65,6 +67,7 @@ export default function VideoUploader() {
       const metadataBlob = new Blob([JSON.stringify({
         ...metadata,
         associatedVideo: videoFilename,
+        videoTitle: metadata.videoTitle || videoFilename, // Use videoTitle or fallback to filename
       })], { type: 'application/json' });
 
       // Create a File object from the blob
@@ -97,6 +100,19 @@ export default function VideoUploader() {
               onChange={handleFormChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               required
+            />
+          </div>
+          <div>
+            <label htmlFor="videoTitle" className="block text-sm font-medium text-gray-900 mb-1">Video Title</label>
+            <input
+              type="text"
+              id="videoTitle"
+              name="videoTitle"
+              value={formData.videoTitle}
+              onChange={handleFormChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              required
+              placeholder="Enter a title for your video"
             />
           </div>
           <div>
