@@ -24,5 +24,9 @@ export default async function DashboardPage() {
 
   const metadata = await getMetadataEntries();
 
-  return <DashboardContent initialMetadata={metadata} userName={user.firstName} />;
+  return <DashboardContent 
+    initialMetadata={metadata} 
+    userName={user.firstName}
+    userId={user.id}
+  />;
 } 

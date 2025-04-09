@@ -33,6 +33,21 @@ export const ourFileRouter = {
         uploadedAt: new Date().toISOString()
       };
     }),
+
+  favoritesUploader: f({ "application/json": { maxFileSize: "1MB", maxFileCount: 1 } })
+    .middleware(async () => {
+      console.log("[MIDDLEWARE] Favorites request received");
+      return {};
+    })
+    .onUploadComplete(async ({ file }) => {
+      console.log("[UPLOAD_COMPLETE] Favorites uploaded:", file.name);
+      return {
+        name: file.name,
+        url: file.url,
+        type: file.type,
+        uploadedAt: new Date().toISOString()
+      };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter; 
