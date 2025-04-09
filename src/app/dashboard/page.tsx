@@ -2,8 +2,40 @@ import { SignedIn, UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 
+interface FileInfo {
+  name: string;
+  url: string;
+  uploadedAt: string;
+  key: string;
+  id: string;
+  status: "Uploaded" | "Uploading" | "Failed" | "Deletion Pending";
+}
+
+interface MetadataContent {
+  name: string;
+  email: string;
+  description: string;
+  submittedAt: string;
+  associatedVideo: string;
+  fileInfo: FileInfo;
+}
+
+async function getMetadataEntries(): Promise<MetadataContent[]> {
+  try {
+    const response = await fetch('http://localhost:3000/api/list-metadata', {
+      next: { revalidate: 60 } // Revalidate cache every minute
+    });
+    if (!response.ok) throw new Error('Failed to fetch metadata');
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching metadata:', error);
+    return [];
+  }
+}
+
 export default async function DashboardPage() {
   const user = await currentUser();
+  const metadata = await getMetadataEntries();
   
   if (!user) {
     redirect('/sign-in');
@@ -23,20 +55,38 @@ export default async function DashboardPage() {
             
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {/* Sample Dashboard Widgets */}
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900">Widget 1</h3>
-                    <p className="mt-1 text-gray-500">Sample dashboard content here.</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900">Widget 2</h3>
-                    <p className="mt-1 text-gray-500">More sample content here.</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-lg font-medium text-gray-900">Widget 3</h3>
-                    <p className="mt-1 text-gray-500">Additional sample content.</p>
-                  </div>
+                <h2 className="text-xl font-semibold mb-4">Recent Submissions</h2>
+                <div className="grid grid-cols-1 gap-6">
+                  {metadata.length === 0 ? (
+                    <p className="text-gray-500">No submissions found.</p>
+                  ) : (
+                    metadata.map((entry) => (
+                      <div key={entry.fileInfo.id} className="bg-gray-50 p-6 rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-medium text-gray-900">{entry.name}</h3>
+                            <p className="mt-1 text-gray-500">{entry.email}</p>
+                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(entry.submittedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="mt-3 text-gray-700">{entry.description}</p>
+                        <div className="mt-4 flex items-center justify-between text-sm">
+                          <span className="text-gray-500">
+                            Associated Video: {entry.associatedVideo}
+                          </span>
+                          <span className={`px-2 py-1 rounded-full ${
+                            entry.fileInfo.status === 'Uploaded' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {entry.fileInfo.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
