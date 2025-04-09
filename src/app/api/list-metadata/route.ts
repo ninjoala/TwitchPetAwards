@@ -18,12 +18,21 @@ interface MetadataContent {
   description: string;
   submittedAt: string;
   associatedVideo: string;
+  videoUrl?: string;
   fileInfo: FileInfo;
 }
 
 export async function GET() {
   try {
     const { files } = await utapi.listFiles();
+    
+    // Create a map of video filenames to their URLs
+    const videoMap = new Map(
+      files
+        .filter(file => file.name.endsWith('.mp4') || file.name.endsWith('.webm'))
+        .map(file => [file.name, `https://utfs.io/f/${file.key}`])
+    );
+
     // Filter only metadata files and map to FileInfo structure
     const metadataFiles = files
       .filter(file => file.name.endsWith('.metadata.json'))
@@ -44,6 +53,7 @@ export async function GET() {
           const metadata = await response.json();
           return {
             ...metadata,
+            videoUrl: videoMap.get(metadata.associatedVideo), // Add the video URL
             fileInfo: file
           } as MetadataContent;
         } catch (error) {

@@ -1,6 +1,7 @@
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import VideoPreview from '@/components/VideoPreview';
 
 interface FileInfo {
   name: string;
@@ -17,6 +18,7 @@ interface MetadataContent {
   description: string;
   submittedAt: string;
   associatedVideo: string;
+  videoUrl?: string;
   fileInfo: FileInfo;
 }
 
@@ -87,7 +89,17 @@ export default async function DashboardPage() {
                         <div className="mt-4 flex items-center justify-between">
                           <div>
                             <span className="text-sm font-medium text-gray-500">Associated Video</span>
-                            <p className="mt-1 text-gray-700">{entry.associatedVideo}</p>
+                            <div className="mt-1">
+                              <p className="text-gray-700">{entry.associatedVideo}</p>
+                              {entry.videoUrl && (
+                                <div className="mt-2">
+                                  <VideoPreview 
+                                    videoName={entry.associatedVideo}
+                                    videoUrl={entry.videoUrl}
+                                  />
+                                </div>
+                              )}
+                            </div>
                           </div>
                           <div className="text-right">
                             <span className="text-sm font-medium text-gray-500">Status</span>
