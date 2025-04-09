@@ -146,18 +146,6 @@ export default function DashboardContent({
     setMetadata(sorted);
   };
 
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    }).format(date);
-  };
-
   const filteredMetadata = showFavoritesOnly
     ? metadata.filter(entry => favoritedItems.has(entry.fileInfo.id))
     : metadata;
