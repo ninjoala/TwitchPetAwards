@@ -3,7 +3,7 @@
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import VideoPreview from '@/components/VideoPreview';
 import { useState, useEffect } from 'react';
-import { DELETE } from "../api/delete-file/route";
+import { deleteFiles } from "../api/delete-file/deleteFile";
 import { useUploadThing } from '@/utils/uploadthing';
 
 interface FileInfo {
@@ -167,7 +167,7 @@ export default function DashboardContent({
   };
 
   const handleDelete = async (data: MetadataContent) => {
-    await DELETE(data.fileInfo.key);
+    await deleteFiles(data.fileInfo.key);
     const updatedMetadata = metadata.filter(item => item.fileInfo.key !== data.fileInfo.key);
     setMetadata(updatedMetadata);
     };
