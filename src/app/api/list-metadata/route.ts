@@ -1,3 +1,4 @@
+"use server";
 import { UTApi } from "uploadthing/server";
 import { NextResponse } from "next/server";
 

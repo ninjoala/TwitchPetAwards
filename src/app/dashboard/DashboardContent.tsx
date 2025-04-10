@@ -3,9 +3,8 @@
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import VideoPreview from '@/components/VideoPreview';
 import { useState, useEffect } from 'react';
+import { DELETE } from "../api/delete-file/route";
 import { useUploadThing } from '@/utils/uploadthing';
-import { DELETE } from '../api/delete-file/route';
-import { GET } from '../api/list-metadata/route';
 
 interface FileInfo {
   name: string;
@@ -36,11 +35,11 @@ enum UploadType {
 export default function DashboardContent({ 
   initialMetadata, 
   userName,
-  userId 
+  userId
 }: { 
   initialMetadata: MetadataContent[],
   userName: string | null,
-  userId: string 
+    userId: string,
 }) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [metadata, setMetadata] = useState(initialMetadata);
@@ -168,17 +167,9 @@ export default function DashboardContent({
   };
 
   const handleDelete = async (data: MetadataContent) => {
-    /*await fetch(`https://api.uploadthing.com/api/deleteFiles`, { method: "DELETE", body: JSON.stringify(data.fileInfo.key) });
-    const response = await fetch(
-      `https://api.uploadthing.com/api/deleteFiles/api/listFiles`,
-      { method: "POST" }
-    );
-    const allFiles = await response.json();
-    setMetadata(allFiles);
-      //await DELETE(data.fileInfo.key);
-      //const updatedData = await GET();
-      //const updatedJson = await updatedData.json();
-      //setMetadata(updatedJson);*/
+    await DELETE(data.fileInfo.key);
+    const updatedMetadata = metadata.filter(item => item.fileInfo.key !== data.fileInfo.key);
+    setMetadata(updatedMetadata);
     };
 
   const toggleSort = () => {
