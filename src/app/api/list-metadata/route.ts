@@ -1,3 +1,4 @@
+"use server";
 import { UTApi } from "uploadthing/server";
 import { NextResponse } from "next/server";
 
@@ -21,6 +22,12 @@ interface MetadataContent {
   videoTitle: string;
   videoUrl?: string;
   fileInfo: FileInfo;
+  uploadMethod: UploadType;
+}
+
+enum UploadType {
+  link,
+  file
 }
 
 export async function GET() {
@@ -54,8 +61,9 @@ export async function GET() {
           const metadata = await response.json();
           return {
             ...metadata,
-            videoUrl: videoMap.get(metadata.associatedVideo), // Add the video URL
-            fileInfo: file
+            videoUrl: metadata.videoUrl != null ? metadata.videoUrl : videoMap.get(metadata.associatedVideo), // Add the video URL
+            fileInfo: file,
+            uploadMethod: videoMap.get(metadata.associatedVideo) != null ? UploadType.file : UploadType.link
           } as MetadataContent;
         } catch (error) {
           console.error(`Error fetching metadata for ${file.name}:`, error);
@@ -64,13 +72,13 @@ export async function GET() {
       })
     );
 
+    console.log(metadataContents);
     // Filter out any failed fetches and sort by uploadedAt
     const validMetadata = metadataContents
       .filter((item: MetadataContent | null): item is MetadataContent => item !== null)
       .sort((a: MetadataContent, b: MetadataContent) => 
         new Date(b.fileInfo.uploadedAt).getTime() - new Date(a.fileInfo.uploadedAt).getTime()
       );
-
     return NextResponse.json(validMetadata);
   } catch (error) {
     console.error("Error fetching metadata:", error);
