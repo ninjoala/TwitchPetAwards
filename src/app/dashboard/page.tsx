@@ -1,14 +1,14 @@
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import { GET } from '../api/list-metadata/route';
 import DashboardContent from './DashboardContent';
 
 async function getMetadataEntries() {
   try {
-    const response = await fetch('http://localhost:3000/api/list-metadata', {
-      next: { revalidate: 60 } // Revalidate cache every minute
-    });
+    const response = await GET();
+    const data = response.json();
     if (!response.ok) throw new Error('Failed to fetch metadata');
-    return response.json();
+    return data;
   } catch (error) {
     console.error('Error fetching metadata:', error);
     return [];
