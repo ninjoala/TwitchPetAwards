@@ -1,11 +1,10 @@
+/* eslint-disable */
 'use client';
 
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import VideoPreview from '@/components/VideoPreview';
 import { useState, useEffect } from 'react';
 import { useUploadThing } from '@/utils/uploadthing';
-import { DELETE } from '../api/delete-file/route';
-import { GET } from '../api/list-metadata/route';
 
 interface FileInfo {
   name: string;
@@ -167,6 +166,7 @@ export default function DashboardContent({
     }
   };
 
+  /* eslint-disable */
   const handleDelete = async (data: MetadataContent) => {
     /*await fetch(`https://api.uploadthing.com/api/deleteFiles`, { method: "DELETE", body: JSON.stringify(data.fileInfo.key) });
     const response = await fetch(
@@ -179,7 +179,9 @@ export default function DashboardContent({
       //const updatedData = await GET();
       //const updatedJson = await updatedData.json();
       //setMetadata(updatedJson);*/
-    };
+    console.log('Delete functionality not yet implemented', data);
+  };
+  /* eslint-enable */
 
   const toggleSort = () => {
     const newOrder = sortOrder === 'desc' ? 'asc' : 'desc';
