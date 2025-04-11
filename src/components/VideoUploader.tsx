@@ -120,6 +120,10 @@ export default function VideoUploader() {
   const handleLinkSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!savedSubmission) return;
+    if (!videoLink) {
+      setError('Please enter a valid video URL');
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -130,9 +134,11 @@ export default function VideoUploader() {
       const metadata = {
         ...savedSubmission,
         associatedVideo: linkSubmissionId,
-        videoUrl: videoLink,
-        videoTitle: savedSubmission.videoTitle
+        videoUrl: videoLink.trim(), // Ensure we trim the URL
+        videoTitle: savedSubmission.videoTitle || 'Video Link Submission'
       };
+
+      console.log('[LINK SUBMISSION] Creating metadata:', metadata);
 
       // Create a JSON blob with the metadata
       const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });

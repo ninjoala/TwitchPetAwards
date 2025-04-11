@@ -12,9 +12,17 @@ async function getMetadataEntries() {
       throw new Error('Failed to fetch metadata');
     }
     const data = await response.json();
+    
+    // Ensure proper serialization of the data
+    const processedData = data.map((entry: any) => ({
+      ...entry,
+      videoUrl: entry.videoUrl || null,
+      uploadMethod: entry.associatedVideo?.startsWith('link_') ? 0 : 1
+    }));
+    
     const endTime = performance.now();
     console.log(`[PERF] Metadata fetch completed in ${(endTime - startTime).toFixed(2)}ms`);
-    return data;
+    return processedData;
   } catch (error) {
     console.error('Error fetching metadata:', error);
     return [];

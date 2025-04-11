@@ -67,8 +67,24 @@ export default function DashboardContent({
       videoTitle: entry.videoTitle,
       associatedVideo: entry.associatedVideo,
       videoUrl: entry.videoUrl,
-      isLink: entry.associatedVideo.startsWith('link_')
+      isLink: entry.associatedVideo.startsWith('link_'),
+      uploadMethod: entry.uploadMethod
     })));
+  }, [initialMetadata]);
+
+  // Process metadata when it changes
+  useEffect(() => {
+    if (initialMetadata) {
+      const processedMetadata = initialMetadata.map(entry => {
+        const isLinkSubmission = entry.associatedVideo.startsWith('link_');
+        return {
+          ...entry,
+          videoUrl: isLinkSubmission ? entry.videoUrl : entry.videoUrl,
+          uploadMethod: isLinkSubmission ? UploadType.link : UploadType.file
+        };
+      });
+      setMetadata(processedMetadata);
+    }
   }, [initialMetadata]);
 
   useEffect(() => {
@@ -495,7 +511,18 @@ export default function DashboardContent({
                                     href={entry.videoUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                                    className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold text-sm cursor-pointer hover:underline transition-colors duration-200"
+                                    onClick={(e) => {
+                                      console.log('Link submission:', {
+                                        videoUrl: entry.videoUrl,
+                                        uploadMethod: entry.uploadMethod,
+                                        associatedVideo: entry.associatedVideo
+                                      });
+                                      if (!entry.videoUrl) {
+                                        e.preventDefault();
+                                        console.error('No video URL found for link submission');
+                                      }
+                                    }}
                                   >
                                     <span>View Link</span>
                                     <svg

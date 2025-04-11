@@ -76,14 +76,33 @@ export async function GET() {
         if (!response.ok) return null;
         
         const metadata = await response.json();
-        const videoUrl = videoMap.get(metadata.associatedVideo);
+        const isLinkSubmission = metadata.associatedVideo?.startsWith('link_');
         
-        return {
+        // For link submissions, preserve the original videoUrl
+        // For file uploads, get the URL from videoMap
+        const videoUrl = isLinkSubmission 
+          ? metadata.videoUrl  // Keep the original videoUrl for link submissions
+          : videoMap.get(metadata.associatedVideo);
+        
+        console.log('[METADATA] Processing:', {
+          isLinkSubmission,
+          videoUrl,
+          associatedVideo: metadata.associatedVideo,
+          originalVideoUrl: metadata.videoUrl
+        });
+        
+        // Only include videoUrl if it exists
+        const processedMetadata = {
           ...metadata,
           fileInfo: file,
-          videoUrl,
-          uploadMethod: metadata.videoUrl ? UploadType.link : UploadType.file
+          uploadMethod: isLinkSubmission ? UploadType.link : UploadType.file
         };
+        
+        if (videoUrl) {
+          processedMetadata.videoUrl = videoUrl;
+        }
+        
+        return processedMetadata;
       } catch (error) {
         console.error(`Error processing metadata file ${file.name}:`, error);
         return null;
