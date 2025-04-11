@@ -35,12 +35,10 @@ enum UploadType {
 
 export default function DashboardContent({ 
   initialMetadata, 
-  userName,
   userId
 }: { 
   initialMetadata: MetadataContent[],
-  userName: string | null,
-    userId: string,
+  userId: string,
 }) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [metadata, setMetadata] = useState<MetadataContent[]>(initialMetadata);
@@ -51,7 +49,6 @@ export default function DashboardContent({
   const [favoritedItems, setFavoritedItems] = useState<Set<string>>(new Set());
   const [loadingFavorite, setLoadingFavorite] = useState<string | null>(null);
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState<MetadataContent | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -580,7 +577,7 @@ export default function DashboardContent({
               </svg>
             </div>
             <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete Video?</h3>
-            <p className="text-gray-600 text-center mb-6">Are you sure? This can't be undone.</p>
+            <p className="text-gray-600 text-center mb-6">Are you sure? This can&apos;t be undone.</p>
             <div className="flex gap-4">
               <button
                 onClick={handleDeleteCancel}

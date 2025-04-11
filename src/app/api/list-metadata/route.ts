@@ -6,7 +6,7 @@ const utapi = new UTApi();
 
 // Cache metadata for 5 minutes
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
-let cachedMetadata: any[] | null = null;
+let cachedMetadata: MetadataContent[] | null = null;
 let lastFetchTime = 0;
 
 interface FileInfo {
@@ -28,6 +28,7 @@ interface MetadataContent {
   videoUrl?: string;
   fileInfo: FileInfo;
   uploadMethod: UploadType;
+  isAdopted: boolean;
 }
 
 enum UploadType {
@@ -89,7 +90,7 @@ export async function GET() {
       }
     });
 
-    const metadataContents = (await Promise.all(metadataPromises)).filter(Boolean);
+    const metadataContents = (await Promise.all(metadataPromises)).filter(Boolean) as MetadataContent[];
     
     // Update cache
     cachedMetadata = metadataContents;

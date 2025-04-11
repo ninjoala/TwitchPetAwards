@@ -24,7 +24,6 @@ interface SubmissionData {
 }
 
 export default function VideoUploader() {
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [submissionType, setSubmissionType] = useState<'link' | 'upload' | null>(null);
   const [videoLink, setVideoLink] = useState('');
@@ -37,7 +36,9 @@ export default function VideoUploader() {
   });
   const [savedSubmission, setSavedSubmission] = useState<SubmissionData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
   
   // Initialize the upload hook for metadata
   const { startUpload: startMetadataUpload } = useUploadThing("metadataUploader", {
@@ -336,7 +337,7 @@ export default function VideoUploader() {
               onClientUploadComplete={async (res) => {
                 try {
                   console.log("[UPLOAD] Upload completed:", res);
-                  setUploadProgress(0);
+                  setIsSubmitting(false);
                   
                   if (!res?.[0]) {
                     throw new Error('No response from video upload');
@@ -354,44 +355,48 @@ export default function VideoUploader() {
                   setSavedSubmission(null);
                   setSelectedFile(null);
                   setSubmissionType(null);
-                } catch (error: Error | unknown) {
+                } catch (error) {
                   console.error("[UPLOAD] Error in upload completion:", error);
-                  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                  alert(`Failed to complete the upload process. Please try again. Error: ${errorMessage}`);
-                } finally {
-                  setIsSubmitting(false);
+                  setError(error instanceof Error ? error.message : 'An unknown error occurred');
+                  setShowErrorPopup(true);
                 }
               }}
               onUploadError={(error: Error) => {
                 console.error("[UPLOAD] Error:", error);
-                setUploadProgress(0);
                 setIsSubmitting(false);
-                alert(`ERROR! ${error.message}`);
+                setError(error.message);
+                setShowErrorPopup(true);
               }}
               onUploadBegin={(fileName) => {
                 console.log("[UPLOAD] Starting upload of:", fileName);
-                setUploadProgress(0);
                 setIsSubmitting(true);
-              }}
-              onUploadProgress={(progress) => {
-                setUploadProgress(progress);
+                setError(null);
               }}
               onDrop={async (acceptedFiles) => {
-                const originalFile = acceptedFiles[0];
-                if (!originalFile) return;
+                try {
+                  const originalFile = acceptedFiles[0];
+                  if (!originalFile) {
+                    throw new Error('No file selected');
+                  }
 
-                const newFilename = generateUniqueFilename(originalFile.name);
-                console.log("[DROP] Original filename:", originalFile.name);
-                console.log("[DROP] New filename:", newFilename);
+                  const newFilename = generateUniqueFilename(originalFile.name);
+                  console.log("[DROP] Original filename:", originalFile.name);
+                  console.log("[DROP] New filename:", newFilename);
 
-                setSelectedFile(originalFile.name);
+                  setSelectedFile(originalFile.name);
+                  setError(null);
 
-                const renamedFile = new File([originalFile], newFilename, {
-                  type: originalFile.type,
-                  lastModified: originalFile.lastModified,
-                });
+                  const renamedFile = new File([originalFile], newFilename, {
+                    type: originalFile.type,
+                    lastModified: originalFile.lastModified,
+                  });
 
-                acceptedFiles[0] = renamedFile;
+                  acceptedFiles[0] = renamedFile;
+                } catch (error) {
+                  console.error("[DROP] Error:", error);
+                  setError(error instanceof Error ? error.message : 'An unknown error occurred');
+                  setShowErrorPopup(true);
+                }
               }}
               appearance={{
                 container: "p-8 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-500 transition-colors cursor-pointer",
@@ -444,23 +449,33 @@ export default function VideoUploader() {
             </div>
             <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Success!</h3>
             <p className="text-gray-600 text-center mb-6">Your video has been submitted successfully.</p>
-            <div className="space-y-3">
-              <button
-                onClick={() => setShowSuccessPopup(false)}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
-              >
-                OK
-              </button>
-              <button
-                onClick={() => {
-                  setShowSuccessPopup(false);
-                  window.location.href = '/dashboard';
-                }}
-                className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-800 cursor-pointer"
-              >
-                Go to Dashboard
-              </button>
+            <button
+              onClick={() => setShowSuccessPopup(false)}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error Popup */}
+      {showErrorPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl transform transition-all duration-300 ease-out scale-100 opacity-100">
+            <div className="flex items-center justify-center mb-4">
+              <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Error!</h3>
+            <p className="text-gray-600 text-center mb-6">{error}</p>
+            <button
+              onClick={() => setShowErrorPopup(false)}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
+            >
+              OK
+            </button>
           </div>
         </div>
       )}

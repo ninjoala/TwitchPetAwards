@@ -39,7 +39,6 @@ export default async function DashboardPage() {
 
   return <DashboardContent 
     initialMetadata={metadata} 
-    userName={user.firstName}
     userId={user.id}
   />;
 } 
