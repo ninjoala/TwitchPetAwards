@@ -26,6 +26,7 @@ interface MetadataContent {
   fileInfo: FileInfo;
   uploadMethod: UploadType;
   isAdopted: boolean;
+  petName: string;
 }
 
 enum UploadType {
@@ -66,8 +67,24 @@ export default function DashboardContent({
       videoTitle: entry.videoTitle,
       associatedVideo: entry.associatedVideo,
       videoUrl: entry.videoUrl,
-      isLink: entry.associatedVideo.startsWith('link_')
+      isLink: entry.associatedVideo.startsWith('link_'),
+      uploadMethod: entry.uploadMethod
     })));
+  }, [initialMetadata]);
+
+  // Process metadata when it changes
+  useEffect(() => {
+    if (initialMetadata) {
+      const processedMetadata = initialMetadata.map(entry => {
+        const isLinkSubmission = entry.associatedVideo.startsWith('link_');
+        return {
+          ...entry,
+          videoUrl: isLinkSubmission ? entry.videoUrl : entry.videoUrl,
+          uploadMethod: isLinkSubmission ? UploadType.link : UploadType.file
+        };
+      });
+      setMetadata(processedMetadata);
+    }
   }, [initialMetadata]);
 
   useEffect(() => {
@@ -436,18 +453,20 @@ export default function DashboardContent({
                           </div>
 
                           {/* Submitter Info */}
-                          <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-lg">
-                            <div>
-                              <span className="text-xs font-medium text-gray-500">
-                                Submitter
-                              </span>
-                              <p className="mt-0.5 text-gray-900 text-sm">{entry.name}</p>
-                            </div>
-                            <div>
-                              <span className="text-xs font-medium text-gray-500">
-                                Email
-                              </span>
-                              <p className="mt-0.5 text-gray-900 text-sm truncate">{entry.email}</p>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <span className="text-xs font-medium text-gray-500">
+                              Submitter Info
+                            </span>
+                            <div className="mt-0.5 space-y-1">
+                              <p className="text-gray-700 text-sm">
+                                <span className="font-medium">Name:</span> {entry.name}
+                              </p>
+                              <p className="text-gray-700 text-sm">
+                                <span className="font-medium">Email:</span> {entry.email}
+                              </p>
+                              <p className="text-gray-700 text-sm">
+                                <span className="font-medium">Pet Name:</span> {entry.petName}
+                              </p>
                             </div>
                           </div>
 
@@ -492,7 +511,18 @@ export default function DashboardContent({
                                     href={entry.videoUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold text-sm"
+                                    className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold text-sm cursor-pointer hover:underline transition-colors duration-200"
+                                    onClick={(e) => {
+                                      console.log('Link submission:', {
+                                        videoUrl: entry.videoUrl,
+                                        uploadMethod: entry.uploadMethod,
+                                        associatedVideo: entry.associatedVideo
+                                      });
+                                      if (!entry.videoUrl) {
+                                        e.preventDefault();
+                                        console.error('No video URL found for link submission');
+                                      }
+                                    }}
                                   >
                                     <span>View Link</span>
                                     <svg

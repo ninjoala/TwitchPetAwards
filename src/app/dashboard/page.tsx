@@ -3,6 +3,27 @@ import { redirect } from 'next/navigation';
 import { GET } from '../api/list-metadata/route';
 import DashboardContent from './DashboardContent';
 
+interface MetadataEntry {
+  name: string;
+  email: string;
+  description: string;
+  submittedAt: string;
+  associatedVideo: string;
+  videoTitle: string;
+  videoUrl?: string | null;
+  fileInfo: {
+    name: string;
+    url: string;
+    uploadedAt: string;
+    key: string;
+    id: string;
+    status: "Uploaded" | "Uploading" | "Failed" | "Deletion Pending";
+  };
+  uploadMethod: number;
+  isAdopted: boolean;
+  petName: string;
+}
+
 async function getMetadataEntries() {
   const startTime = performance.now();
   try {
@@ -12,9 +33,17 @@ async function getMetadataEntries() {
       throw new Error('Failed to fetch metadata');
     }
     const data = await response.json();
+    
+    // Ensure proper serialization of the data
+    const processedData = data.map((entry: MetadataEntry) => ({
+      ...entry,
+      videoUrl: entry.videoUrl || null,
+      uploadMethod: entry.associatedVideo?.startsWith('link_') ? 0 : 1
+    }));
+    
     const endTime = performance.now();
     console.log(`[PERF] Metadata fetch completed in ${(endTime - startTime).toFixed(2)}ms`);
-    return data;
+    return processedData;
   } catch (error) {
     console.error('Error fetching metadata:', error);
     return [];
