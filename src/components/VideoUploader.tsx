@@ -334,8 +334,8 @@ export default function VideoUploader() {
                   // Upload the metadata
                   await uploadMetadata(savedSubmission, res[0].name);
                   
-                  // Only clear state and show success message if both uploads succeed
-                  alert(`Upload completed!\nFile name: ${res[0].name}`);
+                  // Show success popup
+                  setShowSuccessPopup(true);
                   setSavedSubmission(null);
                   setSelectedFile(null);
                   setSubmissionType(null);
@@ -343,16 +343,20 @@ export default function VideoUploader() {
                   console.error("[UPLOAD] Error in upload completion:", error);
                   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
                   alert(`Failed to complete the upload process. Please try again. Error: ${errorMessage}`);
+                } finally {
+                  setIsSubmitting(false);
                 }
               }}
               onUploadError={(error: Error) => {
                 console.error("[UPLOAD] Error:", error);
                 setUploadProgress(0);
+                setIsSubmitting(false);
                 alert(`ERROR! ${error.message}`);
               }}
               onUploadBegin={(fileName) => {
                 console.log("[UPLOAD] Starting upload of:", fileName);
                 setUploadProgress(0);
+                setIsSubmitting(true);
               }}
               onUploadProgress={(progress) => {
                 setUploadProgress(progress);
@@ -384,7 +388,17 @@ export default function VideoUploader() {
                 label: "Drop your video here or click to choose",
                 allowedContent: "Video files up to 512MB",
                 button: (args) => {
-                  if (args.ready) return "Submit";
+                  if (args.ready) return (
+                    <span className="flex items-center justify-center">
+                      <span>Submit</span>
+                      {isSubmitting && (
+                        <svg className="animate-spin -mr-1 ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      )}
+                    </span>
+                  );
                   if (args.isUploading) return "Uploading...";
                   return "Getting ready...";
                 }
@@ -404,19 +418,6 @@ export default function VideoUploader() {
         </div>
       )}
       
-      {/* Bottom Progress Indicator */}
-      {uploadProgress > 0 && uploadProgress < 100 && (
-        <div className="mt-6 text-center">
-          <div className="relative h-4 w-full bg-blue-100 rounded-full overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-blue-500 transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            />
-          </div>
-          <p className="mt-2 text-sm text-blue-600 font-medium">Uploading... {Math.round(uploadProgress)}%</p>
-        </div>
-      )}
-
       {/* Success Popup */}
       {showSuccessPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -427,7 +428,7 @@ export default function VideoUploader() {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Success!</h3>
-            <p className="text-gray-600 text-center mb-6">Your video link has been submitted successfully.</p>
+            <p className="text-gray-600 text-center mb-6">Your video has been submitted successfully.</p>
             <button
               onClick={() => setShowSuccessPopup(false)}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
