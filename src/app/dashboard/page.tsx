@@ -6,8 +6,10 @@ import DashboardContent from './DashboardContent';
 async function getMetadataEntries() {
   try {
     const response = await GET();
-    const data = response.json();
-    if (!response.ok) throw new Error('Failed to fetch metadata');
+    if (!response.ok) {
+      throw new Error('Failed to fetch metadata');
+    }
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error('Error fetching metadata:', error);

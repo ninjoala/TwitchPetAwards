@@ -34,56 +34,57 @@ export async function GET() {
   try {
     const { files } = await utapi.listFiles();
     
+    if (!files || !Array.isArray(files)) {
+      throw new Error('Invalid response from UploadThing API');
+    }
+
     // Create a map of video filenames to their URLs
     const videoMap = new Map(
       files
-        .filter(file => file.name.endsWith('.mp4') || file.name.endsWith('.webm'))
+        .filter(file => file && file.name && (file.name.endsWith('.mp4') || file.name.endsWith('.webm')))
         .map(file => [file.name, `https://utfs.io/f/${file.key}`])
     );
 
     // Filter only metadata files and map to FileInfo structure
     const metadataFiles = files
-      .filter(file => file.name.endsWith('.metadata.json'))
+      .filter(file => file && file.name && file.name.endsWith('.metadata.json'))
       .map(file => ({
         name: file.name,
         url: `https://utfs.io/f/${file.key}`,
         uploadedAt: new Date(file.uploadedAt).toISOString(),
         key: file.key,
         id: file.id,
-        status: file.status
+        status: "Uploaded" as const
       }));
 
-    // For each metadata file, fetch its content
-    const metadataContents = await Promise.all(
-      metadataFiles.map(async (file: FileInfo) => {
-        try {
-          const response = await fetch(file.url);
-          const metadata = await response.json();
-          return {
-            ...metadata,
-            videoUrl: metadata.videoUrl != null ? metadata.videoUrl : videoMap.get(metadata.associatedVideo), // Add the video URL
-            fileInfo: file,
-            uploadMethod: videoMap.get(metadata.associatedVideo) != null ? UploadType.file : UploadType.link
-          } as MetadataContent;
-        } catch (error) {
-          console.error(`Error fetching metadata for ${file.name}:`, error);
-          return null;
-        }
-      })
-    );
+    // Fetch and parse metadata for each file
+    const metadataContents: MetadataContent[] = [];
+    
+    for (const file of metadataFiles) {
+      try {
+        const response = await fetch(file.url);
+        if (!response.ok) continue;
+        
+        const metadata = await response.json();
+        const videoUrl = videoMap.get(metadata.associatedVideo);
+        
+        metadataContents.push({
+          ...metadata,
+          fileInfo: file,
+          videoUrl,
+          uploadMethod: metadata.videoUrl ? UploadType.link : UploadType.file
+        });
+      } catch (error) {
+        console.error(`Error processing metadata file ${file.name}:`, error);
+        continue;
+      }
+    }
 
-    console.log(metadataContents);
-    // Filter out any failed fetches and sort by uploadedAt
-    const validMetadata = metadataContents
-      .filter((item: MetadataContent | null): item is MetadataContent => item !== null)
-      .sort((a: MetadataContent, b: MetadataContent) => 
-        new Date(b.fileInfo.uploadedAt).getTime() - new Date(a.fileInfo.uploadedAt).getTime()
-      );
-    return NextResponse.json(validMetadata);
+    return NextResponse.json(metadataContents);
   } catch (error) {
-    console.error("Error fetching metadata:", error);
+    console.error('Error in list-metadata route:', error);
     return NextResponse.json(
-      { error: "Failed to fetch metadata" },
+      { error: 'Failed to fetch metadata' },
       { status: 500 }
     );
   }

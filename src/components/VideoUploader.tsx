@@ -233,7 +233,7 @@ export default function VideoUploader() {
       </div>
 
       {savedSubmission && !submissionType && (
-        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200">
+        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mt-8">
           <h3 className="text-lg font-medium text-gray-900 mb-4">How would you like to submit your video?</h3>
           <div className="grid grid-cols-2 gap-4">
             <button
@@ -259,7 +259,7 @@ export default function VideoUploader() {
       )}
 
       {savedSubmission && submissionType === 'link' && (
-        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200">
+        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mt-8">
           <form onSubmit={handleLinkSubmit} className="space-y-4">
             <div>
               <label htmlFor="videoLink" className="block text-sm font-medium text-gray-900 mb-1">Video URL</label>
@@ -306,7 +306,7 @@ export default function VideoUploader() {
       )}
 
       {savedSubmission && submissionType === 'upload' && (
-        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200">
+        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mt-8">
           {selectedFile && (
             <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-lg text-green-700 flex items-center">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
