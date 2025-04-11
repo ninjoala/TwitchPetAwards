@@ -20,6 +20,7 @@ interface SubmissionData {
   submittedAt: string;
   videoTitle: string;
   videoUrl?: string;  // Added for link submissions
+  isAdopted: boolean; // Added for adoption status
 }
 
 export default function VideoUploader() {
@@ -31,7 +32,8 @@ export default function VideoUploader() {
     name: '',
     email: '',
     description: '',
-    videoTitle: ''
+    videoTitle: '',
+    isAdopted: false
   });
   const [savedSubmission, setSavedSubmission] = useState<SubmissionData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -97,7 +99,8 @@ export default function VideoUploader() {
         name: '',
         email: '',
         description: '',
-        videoTitle: ''
+        videoTitle: '',
+        isAdopted: false
       });
       setSavedSubmission(null);
       setSelectedFile(null);
@@ -145,7 +148,8 @@ export default function VideoUploader() {
         name: '',
         email: '',
         description: '',
-        videoTitle: ''
+        videoTitle: '',
+        isAdopted: false
       });
       setSavedSubmission(null);
       setVideoLink('');
@@ -213,6 +217,17 @@ export default function VideoUploader() {
               placeholder="Tell us about your video and why it should be considered"
               required
             />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isAdopted"
+              name="isAdopted"
+              checked={formData.isAdopted}
+              onChange={(e) => setFormData(prev => ({ ...prev, isAdopted: e.target.checked }))}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isAdopted" className="text-lg font-bold text-gray-900">Was your pet adopted?</label>
           </div>
           <div className="flex justify-center">
             <button

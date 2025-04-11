@@ -25,6 +25,7 @@ interface MetadataContent {
   videoUrl?: string;
   fileInfo: FileInfo;
   uploadMethod: UploadType;
+  isAdopted: boolean;
 }
 
 enum UploadType {
@@ -382,6 +383,25 @@ export default function DashboardContent({
                               </span>
                               <p className="mt-0.5 text-gray-900 text-sm truncate">{entry.email}</p>
                             </div>
+                          </div>
+
+                          {/* Adoption Status */}
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <span className="text-xs font-medium text-gray-500">
+                              Adoption Status
+                            </span>
+                            <p className="mt-0.5 text-gray-900 text-sm">
+                              {entry.isAdopted ? (
+                                <span className="inline-flex items-center text-green-600">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  Adopted Pet
+                                </span>
+                              ) : (
+                                <span className="text-gray-600">Not Adopted</span>
+                              )}
+                            </p>
                           </div>
 
                           {/* Description */}
