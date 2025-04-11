@@ -140,7 +140,7 @@ export default function VideoUploader() {
       <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mb-6">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-1">Name</label>
+            <label htmlFor="name" className="block text-lg font-bold text-gray-900 mb-2">Name</label>
             <input
               type="text"
               id="name"
@@ -148,24 +148,12 @@ export default function VideoUploader() {
               value={formData.name}
               onChange={handleFormChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              placeholder="Enter your full name"
               required
             />
           </div>
           <div>
-            <label htmlFor="videoTitle" className="block text-sm font-medium text-gray-900 mb-1">Video Title</label>
-            <input
-              type="text"
-              id="videoTitle"
-              name="videoTitle"
-              value={formData.videoTitle}
-              onChange={handleFormChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              required
-              placeholder="Enter a title for your video"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-1">Email</label>
+            <label htmlFor="email" className="block text-lg font-bold text-gray-900 mb-2">Email</label>
             <input
               type="email"
               id="email"
@@ -173,18 +161,33 @@ export default function VideoUploader() {
               value={formData.email}
               onChange={handleFormChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              placeholder="Enter your email address"
               required
             />
           </div>
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-900 mb-1">Description</label>
+            <label htmlFor="videoTitle" className="block text-lg font-bold text-gray-900 mb-2">Video Title</label>
+            <input
+              type="text"
+              id="videoTitle"
+              name="videoTitle"
+              value={formData.videoTitle}
+              onChange={handleFormChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              placeholder="Enter a title for your video"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="description" className="block text-lg font-bold text-gray-900 mb-2">Description</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleFormChange}
-              rows={3}
+              rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              placeholder="Tell us about your video and why it should be considered"
               required
             />
           </div>
