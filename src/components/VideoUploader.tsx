@@ -159,8 +159,8 @@ export default function VideoUploader() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mb-6">
+    <div className="max-w-2xl mx-auto mt-16">
+      <div className="bg-white p-8 rounded-lg shadow-sm">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name" className="block text-lg font-bold text-gray-900 mb-2">Name:</label>
