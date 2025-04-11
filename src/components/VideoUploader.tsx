@@ -34,6 +34,8 @@ export default function VideoUploader() {
     videoTitle: ''
   });
   const [savedSubmission, setSavedSubmission] = useState<SubmissionData | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   
   // Initialize the upload hook for metadata
   const { startUpload: startMetadataUpload } = useUploadThing("metadataUploader", {
@@ -90,6 +92,17 @@ export default function VideoUploader() {
         throw new Error('No response from metadata upload');
       }
       
+      // Clear all form data after successful upload
+      setFormData({
+        name: '',
+        email: '',
+        description: '',
+        videoTitle: ''
+      });
+      setSavedSubmission(null);
+      setSelectedFile(null);
+      setSubmissionType(null);
+      
       return true;
     } catch (error) {
       console.error('[METADATA] Upload failed:', error);
@@ -102,6 +115,7 @@ export default function VideoUploader() {
     if (!savedSubmission) return;
 
     try {
+      setIsSubmitting(true);
       // Generate a unique ID for the link submission
       const linkSubmissionId = `link_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
@@ -125,13 +139,22 @@ export default function VideoUploader() {
 
       // Upload the metadata file using the hook
       await startMetadataUpload([metadataFile]);
-      alert('Link submission completed successfully!');
+      setShowSuccessPopup(true);
+      // Clear all form data
+      setFormData({
+        name: '',
+        email: '',
+        description: '',
+        videoTitle: ''
+      });
       setSavedSubmission(null);
       setVideoLink('');
       setSubmissionType(null);
     } catch (error) {
       console.error('[LINK SUBMISSION] Error:', error);
       alert('Failed to submit video link. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -253,9 +276,22 @@ export default function VideoUploader() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
               >
-                Submit Link
+                <span className="flex items-center justify-center">
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Link"
+                  )}
+                </span>
               </button>
               <button
                 type="button"
@@ -378,6 +414,27 @@ export default function VideoUploader() {
             />
           </div>
           <p className="mt-2 text-sm text-blue-600 font-medium">Uploading... {Math.round(uploadProgress)}%</p>
+        </div>
+      )}
+
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl transform transition-all duration-300 ease-out scale-100 opacity-100">
+            <div className="flex items-center justify-center mb-4">
+              <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Success!</h3>
+            <p className="text-gray-600 text-center mb-6">Your video link has been submitted successfully.</p>
+            <button
+              onClick={() => setShowSuccessPopup(false)}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
+            >
+              OK
+            </button>
+          </div>
         </div>
       )}
     </div>
