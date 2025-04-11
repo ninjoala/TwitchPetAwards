@@ -188,12 +188,21 @@ export default function VideoUploader() {
               required
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          >
-            Save Information
-          </button>
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="w-48 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={!formData.name || !formData.email || !formData.videoTitle || !formData.description}
+            >
+              <span className="flex items-center justify-center">
+                <span>Save & Continue</span>
+                <svg className="animate-spin -mr-1 ml-2 h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
         </form>
       </div>
 
@@ -203,7 +212,7 @@ export default function VideoUploader() {
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => setSubmissionType('link')}
-              className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+              className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
             >
               <svg className="w-8 h-8 text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -212,7 +221,7 @@ export default function VideoUploader() {
             </button>
             <button
               onClick={() => setSubmissionType('upload')}
-              className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+              className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
             >
               <svg className="w-8 h-8 text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -241,14 +250,14 @@ export default function VideoUploader() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
               >
                 Submit Link
               </button>
               <button
                 type="button"
                 onClick={() => setSubmissionType(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-100 cursor-pointer"
               >
                 Back
               </button>
@@ -330,7 +339,7 @@ export default function VideoUploader() {
                 container: "p-8 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-500 transition-colors cursor-pointer",
                 label: "text-gray-800 font-medium",
                 allowedContent: "text-gray-600 text-sm mt-2",
-                button: "relative flex h-10 items-center justify-center rounded-lg text-white font-medium transition-all duration-200 ease-in-out px-6 py-3 shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed data-[state=ready]:bg-blue-600 data-[state=ready]:hover:bg-blue-700 data-[state=uploading]:bg-blue-500 data-[state=uploading]:hover:bg-blue-600 data-[state=error]:bg-red-600 data-[state=error]:hover:bg-red-700"
+                button: "relative flex h-10 items-center justify-center rounded-lg text-white font-medium transition-all duration-200 ease-in-out px-6 py-3 shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed data-[state=ready]:bg-blue-600 data-[state=ready]:hover:bg-blue-700 data-[state=uploading]:bg-blue-500 data-[state=uploading]:hover:bg-blue-600 data-[state=error]:bg-red-600 data-[state=error]:hover:bg-red-700 mt-6"
               }}
               content={{
                 label: "Drop your video here or click to choose",
@@ -348,7 +357,7 @@ export default function VideoUploader() {
             <button
               type="button"
               onClick={() => setSubmissionType(null)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-100 cursor-pointer"
             >
               Back
             </button>
