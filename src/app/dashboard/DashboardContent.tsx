@@ -45,6 +45,7 @@ export default function DashboardContent({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [metadata, setMetadata] = useState(initialMetadata);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showAdoptedOnly, setShowAdoptedOnly] = useState(false);
   const { startUpload: startFavoriteUpload } = useUploadThing("favoritesUploader");
   const [favoritedItems, setFavoritedItems] = useState<Set<string>>(new Set());
   const [loadingFavorite, setLoadingFavorite] = useState<string | null>(null);
@@ -213,6 +214,10 @@ export default function DashboardContent({
     ? metadata.filter(entry => favoritedItems.has(entry.fileInfo.id))
     : metadata;
 
+  const filteredByAdoption = showAdoptedOnly
+    ? filteredMetadata.filter(entry => entry.isAdopted)
+    : filteredMetadata;
+
   return (
     <SignedIn>
       <div className="min-h-screen bg-gray-50">
@@ -242,8 +247,12 @@ export default function DashboardContent({
                     <h2 className="text-xl font-semibold">
                       {showFavoritesOnly
                         ? "Favorite Videos"
+                        : showAdoptedOnly
+                        ? "Adopted Pets"
                         : "Recent Submissions"}
                     </h2>
+                  </div>
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                       className={`flex items-center gap-1 px-3 py-1 text-sm rounded-md transition-all duration-200 ${
@@ -267,38 +276,63 @@ export default function DashboardContent({
                       </svg>
                       {showFavoritesOnly ? "Show All" : "Show Favorites"}
                     </button>
-                  </div>
-                  <button
-                    onClick={toggleSort}
-                    className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border rounded-md hover:bg-gray-50"
-                  >
-                    Sort by Date
-                    <svg
-                      className={`w-4 h-4 transition-transform ${
-                        sortOrder === "desc" ? "rotate-180" : ""
+                    <button
+                      onClick={() => setShowAdoptedOnly(!showAdoptedOnly)}
+                      className={`flex items-center gap-1 px-3 py-1 text-sm rounded-md transition-all duration-200 ${
+                        showAdoptedOnly
+                          ? "bg-green-100 text-green-700 border border-green-300"
+                          : "text-green-600 hover:text-green-700 border border-green-200 hover:bg-green-50"
                       }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
+                      <svg
+                        className="w-4 h-4"
+                        fill={showAdoptedOnly ? "currentColor" : "none"}
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      {showAdoptedOnly ? "Show All" : "Show Only Adopted"}
+                    </button>
+                    <button
+                      onClick={toggleSort}
+                      className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border rounded-md hover:bg-gray-50"
+                    >
+                      Sort by Date
+                      <svg
+                        className={`w-4 h-4 transition-transform ${
+                          sortOrder === "desc" ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredMetadata.length === 0 ? (
+                  {filteredByAdoption.length === 0 ? (
                     <p className="text-gray-500 col-span-full">
                       {showFavoritesOnly
                         ? "No favorite videos yet. Click the star icon on any video to add it to your favorites!"
+                        : showAdoptedOnly
+                        ? "No adopted pets found."
                         : "No submissions found."}
                     </p>
                   ) : (
-                    filteredMetadata.map((entry) => (
+                    filteredByAdoption.map((entry) => (
                       <div
                         key={entry.fileInfo.id}
                         className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col h-full"
