@@ -26,6 +26,7 @@ interface MetadataContent {
   fileInfo: FileInfo;
   uploadMethod: UploadType;
   isAdopted: boolean;
+  petName: string;
 }
 
 enum UploadType {
@@ -436,18 +437,20 @@ export default function DashboardContent({
                           </div>
 
                           {/* Submitter Info */}
-                          <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-lg">
-                            <div>
-                              <span className="text-xs font-medium text-gray-500">
-                                Submitter
-                              </span>
-                              <p className="mt-0.5 text-gray-900 text-sm">{entry.name}</p>
-                            </div>
-                            <div>
-                              <span className="text-xs font-medium text-gray-500">
-                                Email
-                              </span>
-                              <p className="mt-0.5 text-gray-900 text-sm truncate">{entry.email}</p>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <span className="text-xs font-medium text-gray-500">
+                              Submitter Info
+                            </span>
+                            <div className="mt-0.5 space-y-1">
+                              <p className="text-gray-700 text-sm">
+                                <span className="font-medium">Name:</span> {entry.name}
+                              </p>
+                              <p className="text-gray-700 text-sm">
+                                <span className="font-medium">Email:</span> {entry.email}
+                              </p>
+                              <p className="text-gray-700 text-sm">
+                                <span className="font-medium">Pet Name:</span> {entry.petName}
+                              </p>
                             </div>
                           </div>
 
