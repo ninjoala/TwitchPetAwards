@@ -20,10 +20,10 @@ interface SubmissionData {
   submittedAt: string;
   videoTitle: string;
   videoUrl?: string;  // Added for link submissions
+  isAdopted: boolean; // Added for adoption status
 }
 
 export default function VideoUploader() {
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [submissionType, setSubmissionType] = useState<'link' | 'upload' | null>(null);
   const [videoLink, setVideoLink] = useState('');
@@ -31,9 +31,14 @@ export default function VideoUploader() {
     name: '',
     email: '',
     description: '',
-    videoTitle: ''
+    videoTitle: '',
+    isAdopted: false
   });
   const [savedSubmission, setSavedSubmission] = useState<SubmissionData | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
   
   // Initialize the upload hook for metadata
   const { startUpload: startMetadataUpload } = useUploadThing("metadataUploader", {
@@ -90,6 +95,18 @@ export default function VideoUploader() {
         throw new Error('No response from metadata upload');
       }
       
+      // Clear all form data after successful upload
+      setFormData({
+        name: '',
+        email: '',
+        description: '',
+        videoTitle: '',
+        isAdopted: false
+      });
+      setSavedSubmission(null);
+      setSelectedFile(null);
+      setSubmissionType(null);
+      
       return true;
     } catch (error) {
       console.error('[METADATA] Upload failed:', error);
@@ -102,6 +119,7 @@ export default function VideoUploader() {
     if (!savedSubmission) return;
 
     try {
+      setIsSubmitting(true);
       // Generate a unique ID for the link submission
       const linkSubmissionId = `link_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
@@ -125,22 +143,32 @@ export default function VideoUploader() {
 
       // Upload the metadata file using the hook
       await startMetadataUpload([metadataFile]);
-      alert('Link submission completed successfully!');
+      setShowSuccessPopup(true);
+      // Clear all form data
+      setFormData({
+        name: '',
+        email: '',
+        description: '',
+        videoTitle: '',
+        isAdopted: false
+      });
       setSavedSubmission(null);
       setVideoLink('');
       setSubmissionType(null);
     } catch (error) {
       console.error('[LINK SUBMISSION] Error:', error);
       alert('Failed to submit video link. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mb-6">
+    <div className="max-w-2xl mx-auto mt-16">
+      <div className="bg-white p-8 rounded-lg shadow-sm">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-1">Name</label>
+            <label htmlFor="name" className="block text-lg font-bold text-gray-900 mb-2">Name:</label>
             <input
               type="text"
               id="name"
@@ -148,24 +176,12 @@ export default function VideoUploader() {
               value={formData.name}
               onChange={handleFormChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              placeholder="Enter your full name"
               required
             />
           </div>
           <div>
-            <label htmlFor="videoTitle" className="block text-sm font-medium text-gray-900 mb-1">Video Title</label>
-            <input
-              type="text"
-              id="videoTitle"
-              name="videoTitle"
-              value={formData.videoTitle}
-              onChange={handleFormChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              required
-              placeholder="Enter a title for your video"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-1">Email</label>
+            <label htmlFor="email" className="block text-lg font-bold text-gray-900 mb-2">Email:</label>
             <input
               type="email"
               id="email"
@@ -173,37 +189,72 @@ export default function VideoUploader() {
               value={formData.email}
               onChange={handleFormChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              placeholder="Enter your email address"
               required
             />
           </div>
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-900 mb-1">Description</label>
+            <label htmlFor="videoTitle" className="block text-lg font-bold text-gray-900 mb-2">Video Title:</label>
+            <input
+              type="text"
+              id="videoTitle"
+              name="videoTitle"
+              value={formData.videoTitle}
+              onChange={handleFormChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              placeholder="Enter a title for your video"
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="description" className="block text-lg font-bold text-gray-900 mb-2">Description:</label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleFormChange}
-              rows={3}
+              rows={4}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              placeholder="Tell us about your video and why it should be considered"
               required
             />
           </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          >
-            Save Information
-          </button>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="isAdopted"
+              name="isAdopted"
+              checked={formData.isAdopted}
+              onChange={(e) => setFormData(prev => ({ ...prev, isAdopted: e.target.checked }))}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isAdopted" className="text-lg font-bold text-gray-900">Was your pet adopted?</label>
+          </div>
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="w-48 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={!formData.name || !formData.email || !formData.videoTitle || !formData.description}
+            >
+              <span className="flex items-center justify-center">
+                <span>Save & Continue</span>
+                <svg className="animate-spin -mr-1 ml-2 h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
         </form>
       </div>
 
       {savedSubmission && !submissionType && (
-        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200">
+        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mt-8">
           <h3 className="text-lg font-medium text-gray-900 mb-4">How would you like to submit your video?</h3>
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => setSubmissionType('link')}
-              className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+              className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
             >
               <svg className="w-8 h-8 text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -212,7 +263,7 @@ export default function VideoUploader() {
             </button>
             <button
               onClick={() => setSubmissionType('upload')}
-              className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200"
+              className="flex flex-col items-center justify-center p-6 border-2 border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 cursor-pointer"
             >
               <svg className="w-8 h-8 text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -224,7 +275,7 @@ export default function VideoUploader() {
       )}
 
       {savedSubmission && submissionType === 'link' && (
-        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200">
+        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mt-8">
           <form onSubmit={handleLinkSubmit} className="space-y-4">
             <div>
               <label htmlFor="videoLink" className="block text-sm font-medium text-gray-900 mb-1">Video URL</label>
@@ -241,14 +292,27 @@ export default function VideoUploader() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
               >
-                Submit Link
+                <span className="flex items-center justify-center">
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Link"
+                  )}
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() => setSubmissionType(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-100 cursor-pointer"
               >
                 Back
               </button>
@@ -258,7 +322,7 @@ export default function VideoUploader() {
       )}
 
       {savedSubmission && submissionType === 'upload' && (
-        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200">
+        <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mt-8">
           {selectedFile && (
             <div className="mb-4 p-3 bg-green-100 border border-green-300 rounded-lg text-green-700 flex items-center">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -273,7 +337,7 @@ export default function VideoUploader() {
               onClientUploadComplete={async (res) => {
                 try {
                   console.log("[UPLOAD] Upload completed:", res);
-                  setUploadProgress(0);
+                  setIsSubmitting(false);
                   
                   if (!res?.[0]) {
                     throw new Error('No response from video upload');
@@ -286,58 +350,84 @@ export default function VideoUploader() {
                   // Upload the metadata
                   await uploadMetadata(savedSubmission, res[0].name);
                   
-                  // Only clear state and show success message if both uploads succeed
-                  alert(`Upload completed!\nFile name: ${res[0].name}`);
+                  // Show success popup
+                  setShowSuccessPopup(true);
                   setSavedSubmission(null);
                   setSelectedFile(null);
                   setSubmissionType(null);
-                } catch (error: Error | unknown) {
+                } catch (error) {
                   console.error("[UPLOAD] Error in upload completion:", error);
-                  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-                  alert(`Failed to complete the upload process. Please try again. Error: ${errorMessage}`);
+                  setError(error instanceof Error ? error.message : 'An unknown error occurred');
+                  setShowErrorPopup(true);
                 }
               }}
               onUploadError={(error: Error) => {
                 console.error("[UPLOAD] Error:", error);
-                setUploadProgress(0);
-                alert(`ERROR! ${error.message}`);
+                setIsSubmitting(false);
+                setError(error.message);
+                setShowErrorPopup(true);
               }}
               onUploadBegin={(fileName) => {
                 console.log("[UPLOAD] Starting upload of:", fileName);
-                setUploadProgress(0);
-              }}
-              onUploadProgress={(progress) => {
-                setUploadProgress(progress);
+                setIsSubmitting(true);
+                setError(null);
               }}
               onDrop={async (acceptedFiles) => {
-                const originalFile = acceptedFiles[0];
-                if (!originalFile) return;
+                try {
+                  const originalFile = acceptedFiles[0];
+                  if (!originalFile) {
+                    throw new Error('No file selected');
+                  }
 
-                const newFilename = generateUniqueFilename(originalFile.name);
-                console.log("[DROP] Original filename:", originalFile.name);
-                console.log("[DROP] New filename:", newFilename);
+                  const newFilename = generateUniqueFilename(originalFile.name);
+                  console.log("[DROP] Original filename:", originalFile.name);
+                  console.log("[DROP] New filename:", newFilename);
 
-                setSelectedFile(originalFile.name);
+                  setSelectedFile(originalFile.name);
+                  setError(null);
 
-                const renamedFile = new File([originalFile], newFilename, {
-                  type: originalFile.type,
-                  lastModified: originalFile.lastModified,
-                });
+                  const renamedFile = new File([originalFile], newFilename, {
+                    type: originalFile.type,
+                    lastModified: originalFile.lastModified,
+                  });
 
-                acceptedFiles[0] = renamedFile;
+                  acceptedFiles[0] = renamedFile;
+                } catch (error) {
+                  console.error("[DROP] Error:", error);
+                  setError(error instanceof Error ? error.message : 'An unknown error occurred');
+                  setShowErrorPopup(true);
+                }
               }}
               appearance={{
                 container: "p-8 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-500 transition-colors cursor-pointer",
                 label: "text-gray-800 font-medium",
                 allowedContent: "text-gray-600 text-sm mt-2",
-                button: "relative flex h-10 items-center justify-center rounded-lg text-white font-medium transition-all duration-200 ease-in-out px-6 py-3 shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed data-[state=ready]:bg-blue-600 data-[state=ready]:hover:bg-blue-700 data-[state=uploading]:bg-blue-500 data-[state=uploading]:hover:bg-blue-600 data-[state=error]:bg-red-600 data-[state=error]:hover:bg-red-700"
+                button: "relative flex h-10 items-center justify-center rounded-lg text-white font-medium transition-all duration-200 ease-in-out px-6 py-3 shadow-sm hover:shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed data-[state=ready]:bg-blue-600 data-[state=ready]:hover:bg-blue-700 data-[state=uploading]:bg-blue-500 data-[state=uploading]:hover:bg-blue-600 data-[state=error]:bg-red-600 data-[state=error]:hover:bg-red-700 mt-6"
               }}
               content={{
                 label: "Drop your video here or click to choose",
                 allowedContent: "Video files up to 512MB",
                 button: (args) => {
-                  if (args.ready) return "Submit";
-                  if (args.isUploading) return "Uploading...";
+                  if (args.ready) return (
+                    <span className="flex items-center justify-center">
+                      <span>Submit</span>
+                      {isSubmitting && (
+                        <svg className="animate-spin -mr-1 ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      )}
+                    </span>
+                  );
+                  if (args.isUploading) return (
+                    <span className="flex items-center justify-center">
+                      <span>Uploading...</span>
+                      <svg className="animate-spin -mr-1 ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </span>
+                  );
                   return "Getting ready...";
                 }
               }}
@@ -348,7 +438,7 @@ export default function VideoUploader() {
             <button
               type="button"
               onClick={() => setSubmissionType(null)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-100 cursor-pointer"
             >
               Back
             </button>
@@ -356,16 +446,45 @@ export default function VideoUploader() {
         </div>
       )}
       
-      {/* Bottom Progress Indicator */}
-      {uploadProgress > 0 && uploadProgress < 100 && (
-        <div className="mt-6 text-center">
-          <div className="relative h-4 w-full bg-blue-100 rounded-full overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-blue-500 transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            />
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl transform transition-all duration-300 ease-out scale-100 opacity-100">
+            <div className="flex items-center justify-center mb-4">
+              <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Success!</h3>
+            <p className="text-gray-600 text-center mb-6">Your video has been submitted successfully.</p>
+            <button
+              onClick={() => setShowSuccessPopup(false)}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
+            >
+              OK
+            </button>
           </div>
-          <p className="mt-2 text-sm text-blue-600 font-medium">Uploading... {Math.round(uploadProgress)}%</p>
+        </div>
+      )}
+
+      {/* Error Popup */}
+      {showErrorPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl transform transition-all duration-300 ease-out scale-100 opacity-100">
+            <div className="flex items-center justify-center mb-4">
+              <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Error!</h3>
+            <p className="text-gray-600 text-center mb-6">{error}</p>
+            <button
+              onClick={() => setShowErrorPopup(false)}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
+            >
+              OK
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -1,15 +1,23 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { auth } from "@clerk/nextjs/server";
 
 const f = createUploadthing();
+
+const handleAuth = async () => {
+  const session = await auth();
+  if (!session?.userId) throw new Error("Unauthorized");
+  return { userId: session.userId };
+};
 
 export const ourFileRouter = {
   videoUploader: f({ video: { maxFileSize: "512MB", maxFileCount: 1 } })
     .middleware(async () => {
-      console.log("[MIDDLEWARE] Request received");
-      return {};
+      const authData = await handleAuth();
+      console.log("[MIDDLEWARE] Video upload request received for user:", authData.userId);
+      return authData;
     })
-    .onUploadComplete(async ({ file }) => {
-      console.log("[UPLOAD_COMPLETE] File uploaded:", file.name);
+    .onUploadComplete(async ({ file, metadata }) => {
+      console.log("[UPLOAD_COMPLETE] File uploaded:", file.name, "by user:", metadata.userId);
       return {
         name: file.name,
         url: file.url,
@@ -21,11 +29,12 @@ export const ourFileRouter = {
     
   metadataUploader: f({ "application/json": { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
-      console.log("[MIDDLEWARE] Metadata request received");
-      return {};
+      const authData = await handleAuth();
+      console.log("[MIDDLEWARE] Metadata request received for user:", authData.userId);
+      return authData;
     })
-    .onUploadComplete(async ({ file }) => {
-      console.log("[UPLOAD_COMPLETE] Metadata uploaded:", file.name);
+    .onUploadComplete(async ({ file, metadata }) => {
+      console.log("[UPLOAD_COMPLETE] Metadata uploaded:", file.name, "by user:", metadata.userId);
       return {
         name: file.name,
         url: file.url,
@@ -36,11 +45,12 @@ export const ourFileRouter = {
 
   favoritesUploader: f({ "application/json": { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
-      console.log("[MIDDLEWARE] Favorites request received");
-      return {};
+      const authData = await handleAuth();
+      console.log("[MIDDLEWARE] Favorites request received for user:", authData.userId);
+      return authData;
     })
-    .onUploadComplete(async ({ file }) => {
-      console.log("[UPLOAD_COMPLETE] Favorites uploaded:", file.name);
+    .onUploadComplete(async ({ file, metadata }) => {
+      console.log("[UPLOAD_COMPLETE] Favorites uploaded:", file.name, "by user:", metadata.userId);
       return {
         name: file.name,
         url: file.url,
