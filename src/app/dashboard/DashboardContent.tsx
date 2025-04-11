@@ -1,6 +1,6 @@
 'use client';
 
-import { SignedIn, UserButton } from '@clerk/nextjs';
+import { SignedIn } from '@clerk/nextjs';
 import VideoPreview from '@/components/VideoPreview';
 import { useState, useEffect } from 'react';
 import { deleteFiles } from "../api/delete-file/deleteFile";
@@ -232,7 +232,6 @@ export default function DashboardContent({
               <h1 className="text-3xl font-bold text-gray-900">
                 Welcome to the dashboard!
               </h1>
-              <UserButton afterSignOutUrl="/" />
             </div>
 
             <div className="bg-white overflow-hidden shadow rounded-lg">
