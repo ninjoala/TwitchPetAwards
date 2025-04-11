@@ -5,19 +5,15 @@ const f = createUploadthing();
 
 const handleAuth = async () => {
   const session = await auth();
-  if (!session?.userId) throw new Error("Unauthorized");
-  return { userId: session.userId };
+  return { userId: session?.userId || 'anonymous' };
 };
 
 export const ourFileRouter = {
   videoUploader: f({ video: { maxFileSize: "512MB", maxFileCount: 1 } })
     .middleware(async () => {
-      const authData = await handleAuth();
-      console.log("[MIDDLEWARE] Video upload request received for user:", authData.userId);
-      return authData;
+      return { userId: 'anonymous', metadata: {} };
     })
-    .onUploadComplete(async ({ file, metadata }) => {
-      console.log("[UPLOAD_COMPLETE] File uploaded:", file.name, "by user:", metadata.userId);
+    .onUploadComplete(async ({ file }) => {
       return {
         name: file.name,
         url: file.url,
@@ -30,11 +26,9 @@ export const ourFileRouter = {
   metadataUploader: f({ "application/json": { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
       const authData = await handleAuth();
-      console.log("[MIDDLEWARE] Metadata request received for user:", authData.userId);
-      return authData;
+      return { userId: authData.userId, metadata: {} };
     })
-    .onUploadComplete(async ({ file, metadata }) => {
-      console.log("[UPLOAD_COMPLETE] Metadata uploaded:", file.name, "by user:", metadata.userId);
+    .onUploadComplete(async ({ file }) => {
       return {
         name: file.name,
         url: file.url,
@@ -46,11 +40,9 @@ export const ourFileRouter = {
   favoritesUploader: f({ "application/json": { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
       const authData = await handleAuth();
-      console.log("[MIDDLEWARE] Favorites request received for user:", authData.userId);
-      return authData;
+      return { userId: authData.userId, metadata: {} };
     })
-    .onUploadComplete(async ({ file, metadata }) => {
-      console.log("[UPLOAD_COMPLETE] Favorites uploaded:", file.name, "by user:", metadata.userId);
+    .onUploadComplete(async ({ file }) => {
       return {
         name: file.name,
         url: file.url,
