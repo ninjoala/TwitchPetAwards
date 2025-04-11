@@ -48,6 +48,9 @@ export default function DashboardContent({
   const [favoritedItems, setFavoritedItems] = useState<Set<string>>(new Set());
   const [loadingFavorite, setLoadingFavorite] = useState<string | null>(null);
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<MetadataContent | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Debug logging for metadata changes
   useEffect(() => {
@@ -170,7 +173,27 @@ export default function DashboardContent({
     await deleteFiles(data.fileInfo.key);
     const updatedMetadata = metadata.filter(item => item.fileInfo.key !== data.fileInfo.key);
     setMetadata(updatedMetadata);
-    };
+  };
+
+  const handleDeleteClick = (entry: MetadataContent) => {
+    setDeleteConfirmation(entry);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirmation) {
+      setIsDeleting(true);
+      try {
+        await handleDelete(deleteConfirmation);
+      } finally {
+        setIsDeleting(false);
+        setDeleteConfirmation(null);
+      }
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmation(null);
+  };
 
   const toggleSort = () => {
     const newOrder = sortOrder === 'desc' ? 'asc' : 'desc';
@@ -207,7 +230,7 @@ export default function DashboardContent({
           <div className="px-4 py-6 sm:px-0">
             <div className="flex justify-between items-center mb-8">
               <h1 className="text-3xl font-bold text-gray-900">
-                Welcome, {userName || "User"}!
+                Welcome to the dashboard!
               </h1>
               <UserButton afterSignOutUrl="/" />
             </div>
@@ -267,9 +290,9 @@ export default function DashboardContent({
                     </svg>
                   </button>
                 </div>
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredMetadata.length === 0 ? (
-                    <p className="text-gray-500">
+                    <p className="text-gray-500 col-span-full">
                       {showFavoritesOnly
                         ? "No favorite videos yet. Click the star icon on any video to add it to your favorites!"
                         : "No submissions found."}
@@ -278,28 +301,23 @@ export default function DashboardContent({
                     filteredMetadata.map((entry) => (
                       <div
                         key={entry.fileInfo.id}
-                        className="bg-gray-50 p-6 rounded-lg"
+                        className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col h-full"
                       >
-                        <div className="space-y-4">
+                        <div className="flex-1 space-y-3">
                           {/* Header with Video Title and Favorite Button */}
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <span className="text-sm font-medium text-gray-500">
+                          <div className="flex justify-between items-start pb-3 border-b border-gray-100">
+                            <div className="max-w-[70%]">
+                              <span className="text-xs font-medium text-gray-500">
                                 Video Title
                               </span>
-                              <p className="mt-1 text-gray-900 font-medium">
+                              <p className="mt-0.5 text-gray-900 font-semibold text-2xl line-clamp-1">
                                 {entry.videoTitle}
-                                <span className="ml-2 text-red-600 font-bold text-sm">
-                                  {entry.videoUrl
-                                    ? "[UPLOADED VIDEO]"
-                                    : "[URL SUBMISSION]"}
-                                </span>
                               </p>
                             </div>
                             <button
                               onClick={() => handleFavorite(entry)}
                               disabled={loadingFavorite === entry.fileInfo.id}
-                              className={`flex items-center gap-1 px-3 py-1 text-sm rounded-md transition-all duration-200 ${
+                              className={`flex items-center gap-1 px-2 py-1 text-xs rounded-md transition-all duration-200 ${
                                 favoritedItems.has(entry.fileInfo.id)
                                   ? "bg-yellow-100 text-yellow-700 border border-yellow-300"
                                   : "text-yellow-600 hover:text-yellow-700 border border-yellow-200 hover:bg-yellow-50"
@@ -307,7 +325,7 @@ export default function DashboardContent({
                             >
                               {loadingFavorite === entry.fileInfo.id ? (
                                 <svg
-                                  className="animate-spin h-4 w-4"
+                                  className="animate-spin h-3 w-3"
                                   xmlns="http://www.w3.org/2000/svg"
                                   fill="none"
                                   viewBox="0 0 24 24"
@@ -328,7 +346,7 @@ export default function DashboardContent({
                                 </svg>
                               ) : (
                                 <svg
-                                  className="w-4 h-4"
+                                  className="w-3 h-3"
                                   fill={
                                     favoritedItems.has(entry.fileInfo.id)
                                       ? "currentColor"
@@ -351,49 +369,49 @@ export default function DashboardContent({
                             </button>
                           </div>
 
-                          {/* Submitter Name */}
-                          <div>
-                            <span className="text-sm font-medium text-gray-500">
-                              Submitter Name
-                            </span>
-                            <p className="mt-1 text-gray-900">{entry.name}</p>
-                          </div>
-
-                          {/* Submitter Email */}
-                          <div>
-                            <span className="text-sm font-medium text-gray-500">
-                              Submitter Email
-                            </span>
-                            <p className="mt-1 text-gray-900">{entry.email}</p>
+                          {/* Submitter Info */}
+                          <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <span className="text-xs font-medium text-gray-500">
+                                Submitter
+                              </span>
+                              <p className="mt-0.5 text-gray-900 text-sm">{entry.name}</p>
+                            </div>
+                            <div>
+                              <span className="text-xs font-medium text-gray-500">
+                                Email
+                              </span>
+                              <p className="mt-0.5 text-gray-900 text-sm truncate">{entry.email}</p>
+                            </div>
                           </div>
 
                           {/* Description */}
-                          <div>
-                            <span className="text-sm font-medium text-gray-500">
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <span className="text-xs font-medium text-gray-500">
                               Description
                             </span>
-                            <p className="mt-1 text-gray-700 whitespace-pre-wrap">
+                            <p className="mt-0.5 text-gray-700 text-sm line-clamp-2">
                               {entry.description}
                             </p>
                           </div>
 
                           {/* Video Preview */}
-                          <div>
-                            <span className="text-sm font-medium text-gray-500">
-                              Video Link
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <span className="text-xs font-medium text-gray-500">
+                              Video URL
                             </span>
-                            <div className="mt-1">
+                            <div className="mt-0.5">
                               {entry.uploadMethod == UploadType.link && (
-                                <p className="text-gray-700 text-sm mb-2">
+                                <p className="text-gray-700 text-xs mb-1">
                                   <a
                                     href={entry.videoUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center text-blue-600 hover:text-blue-800"
+                                    className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold text-sm"
                                   >
-                                    <span>{entry.videoUrl}</span>
+                                    <span>View Link</span>
                                     <svg
-                                      className="w-4 h-4 ml-1"
+                                      className="w-3 h-3 ml-1 flex-shrink-0"
                                       fill="none"
                                       stroke="currentColor"
                                       viewBox="0 0 24 24"
@@ -420,48 +438,39 @@ export default function DashboardContent({
                           </div>
 
                           {/* Status and Timestamp */}
-                          <div className="flex items-center justify-between pt-4 border-t">
-                            <div>
-                              <span className="text-sm font-medium text-gray-500">
-                                Submitted
-                              </span>
-                              <p className="mt-1 text-gray-700">
-                                {new Date(
-                                  entry.submittedAt
-                                ).toLocaleDateString()}{" "}
-                                at{" "}
-                                {new Date(
-                                  entry.submittedAt
-                                ).toLocaleTimeString()}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-sm font-medium text-gray-500">
-                                Status
-                              </span>
-                              <p
-                                className={`mt-1 px-2 py-1 rounded-full text-sm ${
-                                  entry.fileInfo.status === "Uploaded"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                                }`}
-                              >
-                                {entry.fileInfo.status}
-                              </p>
-                            </div>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <span className="text-xs font-medium text-gray-500">
+                              Submitted
+                            </span>
+                            <p className="mt-0.5 text-gray-700 text-xs">
+                              {new Date(entry.submittedAt).toLocaleDateString()}{" "}
+                              at{" "}
+                              {new Date(entry.submittedAt).toLocaleTimeString()}
+                            </p>
                           </div>
+                        </div>
 
-                          {/* Delete*/}
-                          <div className="flex items-center justify-between pt-4 border-t">
-                            <div>
-                              <button
-                                onClick={() => handleDelete(entry)}
-                                className="flex items-center gap-2 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 border rounded-md hover:bg-gray-50"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
+                        {/* Delete Button - Now at bottom of card */}
+                        <div className="flex justify-end pt-2 border-t border-gray-100 mt-auto">
+                          <button
+                            onClick={() => handleDeleteClick(entry)}
+                            className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-700 border border-red-200 hover:bg-red-50 rounded-md transition-colors font-semibold"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                            Delete
+                          </button>
                         </div>
                       </div>
                     ))
@@ -472,6 +481,58 @@ export default function DashboardContent({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl transform transition-all duration-300 ease-out scale-100 opacity-100">
+            <div className="flex items-center justify-center mb-4">
+              <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Delete Video?</h3>
+            <p className="text-gray-600 text-center mb-6">Are you sure? This can't be undone.</p>
+            <div className="flex gap-4">
+              <button
+                onClick={handleDeleteCancel}
+                className="flex-1 px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? (
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                ) : null}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </SignedIn>
   );
 } 
