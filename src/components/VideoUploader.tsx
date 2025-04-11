@@ -444,12 +444,23 @@ export default function VideoUploader() {
             </div>
             <h3 className="text-xl font-bold text-center text-gray-900 mb-2">Success!</h3>
             <p className="text-gray-600 text-center mb-6">Your video has been submitted successfully.</p>
-            <button
-              onClick={() => setShowSuccessPopup(false)}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
-            >
-              OK
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={() => setShowSuccessPopup(false)}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-blue-800 cursor-pointer"
+              >
+                OK
+              </button>
+              <button
+                onClick={() => {
+                  setShowSuccessPopup(false);
+                  window.location.href = '/dashboard';
+                }}
+                className="w-full bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] active:bg-gray-800 cursor-pointer"
+              >
+                Go to Dashboard
+              </button>
+            </div>
           </div>
         </div>
       )}

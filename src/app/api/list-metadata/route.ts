@@ -4,6 +4,11 @@ import { NextResponse } from "next/server";
 
 const utapi = new UTApi();
 
+// Cache metadata for 5 minutes
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+let cachedMetadata: any[] | null = null;
+let lastFetchTime = 0;
+
 interface FileInfo {
   name: string;
   url: string;
@@ -32,6 +37,12 @@ enum UploadType {
 
 export async function GET() {
   try {
+    // Check cache first
+    const now = Date.now();
+    if (cachedMetadata && (now - lastFetchTime) < CACHE_DURATION) {
+      return NextResponse.json(cachedMetadata);
+    }
+
     const { files } = await utapi.listFiles();
     
     if (!files || !Array.isArray(files)) {
@@ -57,28 +68,32 @@ export async function GET() {
         status: "Uploaded" as const
       }));
 
-    // Fetch and parse metadata for each file
-    const metadataContents: MetadataContent[] = [];
-    
-    for (const file of metadataFiles) {
+    // Fetch and parse metadata for each file in parallel
+    const metadataPromises = metadataFiles.map(async (file) => {
       try {
         const response = await fetch(file.url);
-        if (!response.ok) continue;
+        if (!response.ok) return null;
         
         const metadata = await response.json();
         const videoUrl = videoMap.get(metadata.associatedVideo);
         
-        metadataContents.push({
+        return {
           ...metadata,
           fileInfo: file,
           videoUrl,
           uploadMethod: metadata.videoUrl ? UploadType.link : UploadType.file
-        });
+        };
       } catch (error) {
         console.error(`Error processing metadata file ${file.name}:`, error);
-        continue;
+        return null;
       }
-    }
+    });
+
+    const metadataContents = (await Promise.all(metadataPromises)).filter(Boolean);
+    
+    // Update cache
+    cachedMetadata = metadataContents;
+    lastFetchTime = now;
 
     return NextResponse.json(metadataContents);
   } catch (error) {

@@ -43,9 +43,10 @@ export default function DashboardContent({
     userId: string,
 }) {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [metadata, setMetadata] = useState(initialMetadata);
+  const [metadata, setMetadata] = useState<MetadataContent[]>(initialMetadata);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showAdoptedOnly, setShowAdoptedOnly] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { startUpload: startFavoriteUpload } = useUploadThing("favoritesUploader");
   const [favoritedItems, setFavoritedItems] = useState<Set<string>>(new Set());
   const [loadingFavorite, setLoadingFavorite] = useState<string | null>(null);
@@ -53,6 +54,13 @@ export default function DashboardContent({
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState<MetadataContent | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Set loading to false once initial data is loaded
+  useEffect(() => {
+    if (initialMetadata) {
+      setIsLoading(false);
+    }
+  }, [initialMetadata]);
 
   // Debug logging for metadata changes
   useEffect(() => {
@@ -65,11 +73,17 @@ export default function DashboardContent({
     })));
   }, [initialMetadata]);
 
-  // Debug logging for filtered metadata
   useEffect(() => {
+    console.log('[PERF] DashboardContent mounted');
+    const startTime = performance.now();
+    
+    // Debug logging for filtered metadata
     const filtered = showFavoritesOnly
       ? metadata.filter(entry => favoritedItems.has(entry.fileInfo.id))
       : metadata;
+    
+    const endTime = performance.now();
+    console.log(`[PERF] Metadata filtering completed in ${(endTime - startTime).toFixed(2)}ms`);
     
     console.log('[DEBUG] Filtered metadata:', filtered.map(entry => ({
       id: entry.fileInfo.id,
@@ -83,11 +97,17 @@ export default function DashboardContent({
   // Fetch favorites when component mounts
   useEffect(() => {
     const fetchFavorites = async () => {
+      const startTime = performance.now();
+      console.log('[PERF] Starting favorites fetch');
+      
       try {
         const response = await fetch(`/api/list-favorites?userId=${userId}`);
         if (!response.ok) throw new Error('Failed to fetch favorites');
         const favoriteIds = await response.json();
         setFavoritedItems(new Set(favoriteIds));
+        
+        const endTime = performance.now();
+        console.log(`[PERF] Favorites fetch completed in ${(endTime - startTime).toFixed(2)}ms`);
       } catch (error) {
         console.error('Error fetching favorites:', error);
         setNotification({
@@ -323,7 +343,22 @@ export default function DashboardContent({
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredByAdoption.length === 0 ? (
+                  {isLoading ? (
+                    // Loading skeleton
+                    Array.from({ length: 6 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="bg-white p-4 rounded-lg shadow-sm animate-pulse"
+                      >
+                        <div className="space-y-3">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                        </div>
+                      </div>
+                    ))
+                  ) : filteredByAdoption.length === 0 ? (
                     <p className="text-gray-500 col-span-full">
                       {showFavoritesOnly
                         ? "No favorite videos yet. Click the star icon on any video to add it to your favorites!"
