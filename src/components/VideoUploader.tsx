@@ -140,7 +140,7 @@ export default function VideoUploader() {
       <div className="bg-gray-50 rounded-xl shadow-sm p-8 border border-gray-200 mb-6">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="name" className="block text-lg font-bold text-gray-900 mb-2">Name</label>
+            <label htmlFor="name" className="block text-lg font-bold text-gray-900 mb-2">Name:</label>
             <input
               type="text"
               id="name"
@@ -153,7 +153,7 @@ export default function VideoUploader() {
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-lg font-bold text-gray-900 mb-2">Email</label>
+            <label htmlFor="email" className="block text-lg font-bold text-gray-900 mb-2">Email:</label>
             <input
               type="email"
               id="email"
@@ -166,7 +166,7 @@ export default function VideoUploader() {
             />
           </div>
           <div>
-            <label htmlFor="videoTitle" className="block text-lg font-bold text-gray-900 mb-2">Video Title</label>
+            <label htmlFor="videoTitle" className="block text-lg font-bold text-gray-900 mb-2">Video Title:</label>
             <input
               type="text"
               id="videoTitle"
@@ -179,7 +179,7 @@ export default function VideoUploader() {
             />
           </div>
           <div>
-            <label htmlFor="description" className="block text-lg font-bold text-gray-900 mb-2">Description</label>
+            <label htmlFor="description" className="block text-lg font-bold text-gray-900 mb-2">Description:</label>
             <textarea
               id="description"
               name="description"
