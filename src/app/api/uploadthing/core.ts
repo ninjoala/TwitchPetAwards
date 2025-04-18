@@ -1,15 +1,19 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { auth } from "@clerk/nextjs/server";
 
 const f = createUploadthing();
+
+const handleAuth = async () => {
+  const session = await auth();
+  return { userId: session?.userId || 'anonymous' };
+};
 
 export const ourFileRouter = {
   videoUploader: f({ video: { maxFileSize: "512MB", maxFileCount: 1 } })
     .middleware(async () => {
-      console.log("[MIDDLEWARE] Request received");
-      return {};
+      return { userId: 'anonymous', metadata: {} };
     })
     .onUploadComplete(async ({ file }) => {
-      console.log("[UPLOAD_COMPLETE] File uploaded:", file.name);
       return {
         name: file.name,
         url: file.url,
@@ -21,11 +25,10 @@ export const ourFileRouter = {
     
   metadataUploader: f({ "application/json": { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
-      console.log("[MIDDLEWARE] Metadata request received");
-      return {};
+      const authData = await handleAuth();
+      return { userId: authData.userId, metadata: {} };
     })
     .onUploadComplete(async ({ file }) => {
-      console.log("[UPLOAD_COMPLETE] Metadata uploaded:", file.name);
       return {
         name: file.name,
         url: file.url,
@@ -36,11 +39,10 @@ export const ourFileRouter = {
 
   favoritesUploader: f({ "application/json": { maxFileSize: "1MB", maxFileCount: 1 } })
     .middleware(async () => {
-      console.log("[MIDDLEWARE] Favorites request received");
-      return {};
+      const authData = await handleAuth();
+      return { userId: authData.userId, metadata: {} };
     })
     .onUploadComplete(async ({ file }) => {
-      console.log("[UPLOAD_COMPLETE] Favorites uploaded:", file.name);
       return {
         name: file.name,
         url: file.url,

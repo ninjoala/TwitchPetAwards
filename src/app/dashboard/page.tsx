@@ -3,12 +3,47 @@ import { redirect } from 'next/navigation';
 import { GET } from '../api/list-metadata/route';
 import DashboardContent from './DashboardContent';
 
+interface MetadataEntry {
+  name: string;
+  email: string;
+  description: string;
+  submittedAt: string;
+  associatedVideo: string;
+  videoTitle: string;
+  videoUrl?: string | null;
+  fileInfo: {
+    name: string;
+    url: string;
+    uploadedAt: string;
+    key: string;
+    id: string;
+    status: "Uploaded" | "Uploading" | "Failed" | "Deletion Pending";
+  };
+  uploadMethod: number;
+  isAdopted: boolean;
+  petName: string;
+}
+
 async function getMetadataEntries() {
+  const startTime = performance.now();
   try {
+    console.log('[PERF] Starting metadata fetch');
     const response = await GET();
-    const data = response.json();
-    if (!response.ok) throw new Error('Failed to fetch metadata');
-    return data;
+    if (!response.ok) {
+      throw new Error('Failed to fetch metadata');
+    }
+    const data = await response.json();
+    
+    // Ensure proper serialization of the data
+    const processedData = data.map((entry: MetadataEntry) => ({
+      ...entry,
+      videoUrl: entry.videoUrl || null,
+      uploadMethod: entry.associatedVideo?.startsWith('link_') ? 0 : 1
+    }));
+    
+    const endTime = performance.now();
+    console.log(`[PERF] Metadata fetch completed in ${(endTime - startTime).toFixed(2)}ms`);
+    return processedData;
   } catch (error) {
     console.error('Error fetching metadata:', error);
     return [];
@@ -16,17 +51,23 @@ async function getMetadataEntries() {
 }
 
 export default async function DashboardPage() {
+  const startTime = performance.now();
+  console.log('[PERF] Starting dashboard page load');
+  
   const user = await currentUser();
+  const userTime = performance.now();
+  console.log(`[PERF] User authentication completed in ${(userTime - startTime).toFixed(2)}ms`);
   
   if (!user) {
     redirect('/sign-in');
   }
 
   const metadata = await getMetadataEntries();
+  const metadataTime = performance.now();
+  console.log(`[PERF] Total page load time: ${(metadataTime - startTime).toFixed(2)}ms`);
 
   return <DashboardContent 
     initialMetadata={metadata} 
-    userName={user.firstName}
     userId={user.id}
   />;
 } 
