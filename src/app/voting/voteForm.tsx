@@ -7,7 +7,7 @@ interface VideoEntry {
     id: number;
     Name: string;
     Streamer: string;
-    URL: string;
+    URLSlug: string;
 }
 
 interface Props {
@@ -90,7 +90,7 @@ export default function VoteForm({ initialVideos }: Props) {
                                     <div className="mt-2 relative pb-[56.25%] h-0">
                                         <iframe 
                                             className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                            src={`https://player.twitch.tv/?clip=${entry.URL.split('/').pop()}&parent=${hostname}`}
+                                            src={`https://clips.twitch.tv/embed?clip=${entry.URLSlug}&parent=${hostname}`}
                                             title={entry.Name}
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
