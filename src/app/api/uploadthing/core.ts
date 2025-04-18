@@ -13,7 +13,7 @@ export const ourFileRouter = {
     .middleware(async () => {
       return { userId: 'anonymous', metadata: {} };
     })
-    .onUploadComplete(async ({ file }) => {
+    .onUploadComplete(async ({ file, metadata }) => {
       return {
         name: file.name,
         url: file.url,
@@ -28,7 +28,7 @@ export const ourFileRouter = {
       const authData = await handleAuth();
       return { userId: authData.userId, metadata: {} };
     })
-    .onUploadComplete(async ({ file }) => {
+    .onUploadComplete(async ({ file, metadata }) => {
       return {
         name: file.name,
         url: file.url,
@@ -42,7 +42,7 @@ export const ourFileRouter = {
       const authData = await handleAuth();
       return { userId: authData.userId, metadata: {} };
     })
-    .onUploadComplete(async ({ file }) => {
+    .onUploadComplete(async ({ file, metadata }) => {
       return {
         name: file.name,
         url: file.url,

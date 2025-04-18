@@ -81,59 +81,74 @@ export default function VoteForm() {
       },
     ];
     
-
     return (
-        <div>
-            <div>
-                {(rows.map((entry, index) => (
+        <div className="max-w-4xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-8 text-center">Vote for Your Favorite Video</h1>
+            <div className="space-y-6">
+                {rows.map((entry, index) => (
                     <div
                         key={entry.id}
-                        className="bg-gray-50 p-6 rounded-lg"
+                        className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
                     >
-                        <Checkbox
-                            checked={voteChecked[index]}
-                            onChange={(e) => handleVote(e, entry.id)}
-                            sx={{ '& .MuiSvgIcon-root': { fontSize: 32 } }}
-                        />
-                        <div className="space-y-4">
-                            {/* Header with Video Title and Favorite Button */}
-                            <div className="flex justify-between items-start">
+                        <div className="flex items-start space-x-4">
+                            <Checkbox
+                                checked={voteChecked[index]}
+                                onChange={(e) => handleVote(e, entry.id)}
+                                sx={{ 
+                                    '& .MuiSvgIcon-root': { fontSize: 32 },
+                                    '&.Mui-checked': { color: '#3B82F6' }
+                                }}
+                            />
+                            <div className="flex-1 space-y-4">
+                                {/* Header with Video Title */}
                                 <div>
                                     <span className="text-sm font-medium text-gray-500">
                                         Video Title
                                     </span>
-                                    <p className="mt-1 text-gray-900 font-medium">
+                                    <p className="mt-1 text-lg font-semibold text-gray-900">
                                         {entry.title}
                                     </p>
                                 </div>
-                            </div>
-        
-                            {/* Description */}
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">
-                                    Description
-                                </span>
-                                <p className="mt-1 text-gray-700 whitespace-pre-wrap">
-                                    {entry.description}
-                                </p>
-                            </div>
-        
-                            {/* Video Preview */}
-                            <div>
-                                <span className="text-sm font-medium text-gray-500">
-                                    Video Link
-                                </span>
-                                <div className="mt-1">
-                                    <iframe width="300" height="300" src={entry.url} />
+            
+                                {/* Description */}
+                                <div>
+                                    <span className="text-sm font-medium text-gray-500">
+                                        Description
+                                    </span>
+                                    <p className="mt-1 text-gray-700">
+                                        {entry.description}
+                                    </p>
+                                </div>
+            
+                                {/* Video Preview */}
+                                <div>
+                                    <span className="text-sm font-medium text-gray-500">
+                                        Video Preview
+                                    </span>
+                                    <div className="mt-2 relative pb-[56.25%] h-0">
+                                        <iframe 
+                                            className="absolute top-0 left-0 w-full h-full rounded-lg"
+                                            src={entry.url}
+                                            title={entry.title}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                )))}
+                ))}
             </div>
-            <div>
-                <button onClick={ handleClick }>Submit Vote</button>
+            <div className="mt-8 text-center">
+                <button 
+                    onClick={handleClick}
+                    disabled={!voteId}
+                    className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                >
+                    Submit Vote
+                </button>
             </div>
-    </div>
+        </div>
     );
 }
