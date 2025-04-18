@@ -5,7 +5,6 @@ import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
-import VoteForm from "./voting/voteForm";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,14 +18,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <ClerkProvider>
       <html lang="en">
         <body className={`${inter.variable} antialiased`}>
-          <VoteForm />
           <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
           {children}
         </body>
