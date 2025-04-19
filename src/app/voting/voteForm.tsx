@@ -28,7 +28,11 @@ export default function VoteForm({ initialVideos }: Props) {
     const [hasVoted, setHasVoted] = useState<boolean>(false);
 
     useEffect(() => {
-        setHostname(window.location.hostname);
+        if (typeof window !== 'undefined') {
+            const host = window.location.hostname;
+            setHostname(host);
+            console.log('Setting hostname to:', host);
+        }
     }, []);
 
     useEffect(() => {
@@ -156,7 +160,7 @@ export default function VoteForm({ initialVideos }: Props) {
                                     <div className="mt-2 relative pb-[56.25%] h-0">
                                         <iframe 
                                             className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                            src={`https://clips.twitch.tv/embed?clip=${entry.URLSlug}&parent=${hostname}`}
+                                            src={`https://clips.twitch.tv/embed?clip=${entry.URLSlug}&parent=${hostname}&protocol=http`}
                                             title={entry.Name}
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
