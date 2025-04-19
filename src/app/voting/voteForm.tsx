@@ -12,11 +12,6 @@ interface VideoEntry {
     URLSlug: string;
 }
 
-interface StreamerVideos {
-    streamer: string;
-    videos: VideoEntry[];
-}
-
 interface Props {
     initialVideos: VideoEntry[];
 }
