@@ -114,7 +114,7 @@ export default function VoteForm({ initialVideos }: Props) {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-8 text-center">Vote for Your Favorite Video</h1>
+            <h1 className="text-2xl font-bold text-white mb-8 text-center">Vote for Your Favorite Video</h1>
             {hasVoted && (
                 <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
                     <p className="text-green-700">You have already cast your vote. Thank you for participating!</p>
@@ -126,25 +126,33 @@ export default function VoteForm({ initialVideos }: Props) {
                         <button
                             onClick={() => handleVote(streamerGroup.videos[0].id)}
                             disabled={hasVoted || !isSignedIn}
-                            className={`w-full text-left p-4 rounded-lg transition-colors duration-200 ${
+                            className={`w-full flex items-center p-4 rounded-lg transition-all duration-200 ${
                                 streamerGroup.videos.some(v => v.id === voteId)
-                                    ? 'bg-blue-100 hover:bg-blue-200'
-                                    : 'bg-gray-100 hover:bg-gray-200'
+                                    ? 'bg-[#9146FF] hover:bg-[#7F3FE0] border-2 border-white'
+                                    : 'bg-[#1F1F1F] hover:bg-[#2D2D2D] border-2 border-transparent'
                             }`}
                         >
-                            <h2 className="text-2xl font-bold text-gray-900">
+                            <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden mr-4">
+                                <img 
+                                    src="https://placehold.co/64x64" 
+                                    alt={streamerGroup.streamer}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white flex-grow">
                                 {streamerGroup.streamer}
                             </h2>
+                            {streamerGroup.videos.some(v => v.id === voteId) && (
+                                <svg className="w-6 h-6 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            )}
                         </button>
                         
                         {streamerGroup.videos.map((video) => (
                             <div
                                 key={video.id}
-                                className={`bg-white p-6 rounded-lg shadow-sm border ${
-                                    video.id === voteId
-                                        ? 'border-blue-500 ring-2 ring-blue-500'
-                                        : 'border-gray-200'
-                                } transition-all duration-200`}
+                                className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 transition-all duration-200"
                             >
                                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                                     {video.Name}
@@ -167,7 +175,7 @@ export default function VoteForm({ initialVideos }: Props) {
             <div className="mt-8 text-center">
                 {!isSignedIn ? (
                     <div className="space-y-4">
-                        <p className="text-gray-600">Please sign in to cast your vote</p>
+                        <p className="text-white">Please sign in to cast your vote</p>
                         <SignInButton mode="modal" fallbackRedirectUrl={pathname}>
                             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                                 Sign in to vote
