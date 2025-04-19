@@ -1,6 +1,18 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-export default clerkMiddleware()
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)'])
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) {
+    // First protect the route to ensure user is authenticated
+    await auth.protect()
+    
+    // Then check for admin role
+    await auth.protect((has) => {
+      return has({ role: 'org:admin' })
+    })
+  }
+})
 
 export const config = {
   matcher: [
@@ -9,4 +21,4 @@ export const config = {
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-} 
+}
