@@ -132,13 +132,6 @@ export default function VoteForm({ initialVideos }: Props) {
                                     : 'bg-[#1F1F1F] hover:bg-[#2D2D2D] border-2 border-transparent'
                             }`}
                         >
-                            <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden mr-4">
-                                <img 
-                                    src="https://placehold.co/64x64" 
-                                    alt={streamerGroup.streamer}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
                             <h2 className="text-2xl font-bold text-white flex-grow">
                                 {streamerGroup.streamer}
                             </h2>
