@@ -1,18 +1,22 @@
 # Build stage
 FROM node:18-alpine AS builder
 
-# Declare Clerk build arguments
+# Declare build arguments
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ARG CLERK_SECRET_KEY
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
 
-# Pass Clerk keys during build time
+# Pass environment variables during build time
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
 ENV CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
 
 RUN npm run build
 
