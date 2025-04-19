@@ -5,17 +5,7 @@ const nextConfig = {
     domains: ['uploadthing.com', 'utfs.io'], // Allow Uploadthing domains for images
   },
   async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' http://twitch-pet-awards-ui-bc28h5-b1a268-5-161-68-100.traefik.me https://twitch-pet-awards-ui-bc28h5-b1a268-5-161-68-100.traefik.me;"
-          }
-        ],
-      },
-    ]
+    return [] // Temporarily remove all custom headers
   },
 }
 
