@@ -28,7 +28,10 @@ export default function VoteForm({ initialVideos }: Props) {
     const [hasVoted, setHasVoted] = useState<boolean>(false);
 
     useEffect(() => {
-        setHostname(window.location.hostname);
+        if (typeof window !== 'undefined') {
+            const host = window.location.hostname;
+            setHostname(host);
+        }
     }, []);
 
     useEffect(() => {
