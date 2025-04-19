@@ -1,0 +1,234 @@
+'use client'
+import { Checkbox } from "@mui/material";
+import { useState, useEffect } from "react";
+import supabase from "../data/database";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { SignInButton, UserButton } from "@clerk/nextjs";
+
+interface VideoEntry {
+    id: number;
+    Name: string;
+    Streamer: string;
+    URLSlug: string;
+}
+
+interface Props {
+    initialVideos: VideoEntry[];
+}
+
+export default function VoteForm({ initialVideos }: Props) {
+    const { userId, isSignedIn } = useAuth();
+    const { user } = useUser();
+    const [voteId, setVoteId] = useState<number | null>(null);
+    const [voteChecked, setVoteChecked] = useState<boolean[]>(new Array(initialVideos.length).fill(false));
+    const [hostname, setHostname] = useState<string>('localhost');
+    const [showDialog, setShowDialog] = useState<boolean>(false);
+    const [dialogType, setDialogType] = useState<'success' | 'error'>('success');
+    const [dialogMessage, setDialogMessage] = useState<string>('');
+    const [hasVoted, setHasVoted] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const host = window.location.hostname;
+            setHostname(host);
+            console.log('Setting hostname to:', host);
+        }
+    }, []);
+
+    useEffect(() => {
+        const checkIfVoted = async () => {
+            if (!userId) return;
+            
+            const { data, error } = await supabase
+                .from('Votes')
+                .select('id')
+                .eq('userId', userId)
+                .single();
+
+            if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+                console.error('Error checking vote status:', error);
+                return;
+            }
+
+            setHasVoted(!!data);
+        };
+
+        if (isSignedIn) {
+            checkIfVoted();
+        }
+    }, [isSignedIn, userId]);
+
+    const handleVote = (event: React.ChangeEvent<HTMLInputElement>, entryId: number) => {
+        if (event.target.checked === true && voteId != null && entryId != voteId) {
+            return;
+        }
+
+        if (event.target.checked === true) {
+            setVoteId(entryId);
+            setVoteChecked(prev => prev.map((_, idx) => initialVideos[idx].id === entryId));
+        } else {
+            setVoteId(null);
+            setVoteChecked(new Array(initialVideos.length).fill(false));
+        }
+    }
+
+    const handleClick = async () => {
+        if (!voteId || !userId) return;
+        
+        try {
+            console.log("Inserting To table");
+            console.log(voteId);
+            const { error } = await supabase
+                .from('Votes')
+                .insert({ 
+                    userId,
+                    Email: user?.primaryEmailAddress?.emailAddress,
+                    VotedAtUtc: new Date(), 
+                    videoId: voteId 
+                });
+
+            if (error) throw error;
+
+            // Show success dialog
+            setDialogType('success');
+            setDialogMessage('Your vote has been successfully submitted!');
+            setShowDialog(true);
+            
+            // Reset vote selection and mark as voted
+            setVoteId(null);
+            setVoteChecked(new Array(initialVideos.length).fill(false));
+            setHasVoted(true);
+        } catch (error) {
+            console.error('Error submitting vote:', error);
+            setDialogType('error');
+            setDialogMessage('There was an error submitting your vote. Please try again.');
+            setShowDialog(true);
+        }
+    }
+
+    return (
+        <div className="max-w-4xl mx-auto px-4 py-8">
+            {isSignedIn && (
+                <div className="flex justify-end mb-4">
+                    <UserButton afterSignOutUrl="/" />
+                </div>
+            )}
+            <h1 className="text-2xl font-bold text-gray-900 mb-8 text-center">Vote for Your Favorite Video</h1>
+            {hasVoted && (
+                <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                    <p className="text-green-700">You have already cast your vote. Thank you for participating!</p>
+                </div>
+            )}
+            <div className="space-y-6">
+                {initialVideos.map((entry, index) => (
+                    <div
+                        key={entry.id}
+                        className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
+                    >
+                        <div className="flex items-start space-x-4">
+                            <Checkbox
+                                checked={voteChecked[index]}
+                                onChange={(e) => handleVote(e, entry.id)}
+                                disabled={!isSignedIn || hasVoted}
+                                sx={{ 
+                                    '& .MuiSvgIcon-root': { fontSize: 32 },
+                                    '&.Mui-checked': { color: '#3B82F6' }
+                                }}
+                            />
+                            <div className="flex-1 space-y-4">
+                                {/* Header with Video Title and Streamer */}
+                                <div>
+                                    <span className="text-sm font-medium text-gray-500">
+                                        Video Title
+                                    </span>
+                                    <p className="mt-1 text-lg font-semibold text-gray-900">
+                                        {entry.Name}
+                                    </p>
+                                    <span className="text-sm font-medium text-gray-500 mt-2 block">
+                                        Streamer
+                                    </span>
+                                    <p className="mt-1 text-gray-700">
+                                        {entry.Streamer}
+                                    </p>
+                                </div>
+
+                                {/* Video Preview */}
+                                <div>
+                                    <span className="text-sm font-medium text-gray-500">
+                                        Video Preview
+                                    </span>
+                                    <div className="mt-2 relative pb-[56.25%] h-0">
+                                        <iframe 
+                                            className="absolute top-0 left-0 w-full h-full rounded-lg"
+                                            src={`https://clips.twitch.tv/embed?clip=${entry.URLSlug}&parent=${hostname}&protocol=http`}
+                                            title={entry.Name}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="mt-8 text-center">
+                {!isSignedIn ? (
+                    <div className="space-y-4">
+                        <p className="text-gray-600">Please sign in to cast your vote</p>
+                        <SignInButton mode="modal">
+                            <button className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                                Sign In
+                            </button>
+                        </SignInButton>
+                    </div>
+                ) : hasVoted ? (
+                    <div className="space-y-4">
+                        <p className="text-gray-600">You have already cast your vote</p>
+                    </div>
+                ) : (
+                    <button 
+                        onClick={handleClick}
+                        disabled={!voteId}
+                        className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    >
+                        Submit Vote
+                    </button>
+                )}
+            </div>
+
+            {/* Success/Error Dialog */}
+            {showDialog && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl">
+                        <div className="flex items-center justify-center mb-4">
+                            {dialogType === 'success' ? (
+                                <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            ) : (
+                                <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            )}
+                        </div>
+                        <h3 className={`text-xl font-bold text-center mb-2 ${dialogType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                            {dialogType === 'success' ? 'Success!' : 'Error'}
+                        </h3>
+                        <p className="text-gray-600 text-center mb-6">{dialogMessage}</p>
+                        <button
+                            onClick={() => setShowDialog(false)}
+                            className={`w-full py-2 px-4 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
+                                dialogType === 'success' 
+                                    ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500' 
+                                    : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+                            }`}
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
