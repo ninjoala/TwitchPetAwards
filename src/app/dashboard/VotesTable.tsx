@@ -4,7 +4,8 @@ import { useState } from 'react';
 
 interface Vote {
   id: number;
-  Email: string;
+  userId: string;
+  authProvider: string;
   VotedAtUtc: string;
   videoId: number;
   video: {
@@ -30,7 +31,8 @@ export default function VotesTable({ initialVotes }: Props) {
             <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vote ID</th>
             <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Video</th>
             <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Streamer</th>
-            <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+            <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
+            <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Auth Provider</th>
             <th className="px-6 py-3 border-b text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voted At</th>
           </tr>
         </thead>
@@ -40,13 +42,14 @@ export default function VotesTable({ initialVotes }: Props) {
               <td className="px-6 py-4 border-b text-black">{vote.id}</td>
               <td className="px-6 py-4 border-b text-black">{vote.video?.Name || 'Unknown'}</td>
               <td className="px-6 py-4 border-b text-black">{vote.video?.Streamer || 'Unknown'}</td>
-              <td className="px-6 py-4 border-b text-black">{vote.Email}</td>
+              <td className="px-6 py-4 border-b text-black">{vote.userId}</td>
+              <td className="px-6 py-4 border-b text-black">{vote.authProvider}</td>
               <td className="px-6 py-4 border-b text-black">{new Date(vote.VotedAtUtc).toLocaleString()}</td>
             </tr>
           ))}
           {votes.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-6 py-4 text-center text-black">
+              <td colSpan={6} className="px-6 py-4 text-center text-black">
                 No votes found
               </td>
             </tr>

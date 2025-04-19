@@ -4,7 +4,8 @@ import { useState, useMemo } from 'react';
 
 interface Vote {
   id: number;
-  Email: string;
+  userId: string;
+  authProvider: string;
   VotedAtUtc: string;
   videoId: number;
   video: {

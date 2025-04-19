@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import supabase from "@/app/data/database";
 import VoteAggregatesTable from "./VoteAggregatesTable";
+import VotesTable from "./VotesTable";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -43,9 +44,14 @@ export default async function DashboardPage() {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4 text-black">Dashboard</h1>
       
-      <div className="bg-white rounded-lg shadow p-6">
+      <div className="bg-white rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4 text-black">Vote Counts by Video</h2>
         <VoteAggregatesTable initialVotes={votes || []} />
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold mb-4 text-black">All Votes</h2>
+        <VotesTable initialVotes={votes || []} />
       </div>
     </div>
   );
