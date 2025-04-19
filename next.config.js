@@ -11,7 +11,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' http://localhost:* https://localhost:* https://*.twitch.tv https://*.twitch.tech https://*.twitchcdn.net;"
+            value: "frame-ancestors 'self' http://*.traefik.me https://*.traefik.me http://localhost:* https://localhost:* https://*.twitch.tv https://*.twitch.tech https://*.twitchcdn.net;"
           }
         ],
       },
