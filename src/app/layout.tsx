@@ -12,8 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Twitch Pet Awards',
-  description: 'Submit your pet videos for the Twitch Pet Awards!',
+  title: 'The Pet Awards',
+  description: 'Submit your pet videos for The Pet Awards!',
 };
 
 export default function RootLayout({
