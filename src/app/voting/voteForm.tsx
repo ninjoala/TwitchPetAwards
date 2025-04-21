@@ -113,8 +113,8 @@ export default function VoteForm({ initialVideos }: Props) {
                 Vote for The Pet Awards Clip of the Year!
             </h1>
             {hasVoted && (
-                <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
-                    <p className="text-green-700">You have already cast your vote. Thank you for participating!</p>
+                <div className="mb-8 p-4 bg-black/40 backdrop-blur-sm border border-white/20 rounded-lg text-center">
+                    <p className="text-white text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">You have already cast your vote. Thank you for participating!</p>
                 </div>
             )}
             <div className="space-y-12">
@@ -174,7 +174,7 @@ export default function VoteForm({ initialVideos }: Props) {
                     </div>
                 ) : hasVoted ? (
                     <div className="space-y-4">
-                        <p className="text-gray-600">You have already cast your vote</p>
+                        <p className="text-white">You have already cast your vote</p>
                     </div>
                 ) : (
                     <button 
@@ -201,10 +201,10 @@ export default function VoteForm({ initialVideos }: Props) {
                                 </svg>
                             )}
                         </div>
-                        <h3 className={`text-xl font-bold text-center mb-2 ${dialogType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                        <h3 className={`text-xl font-bold text-center mb-2 ${dialogType === 'success' ? 'text-white' : 'text-red-600'}`}>
                             {dialogType === 'success' ? 'Success!' : 'Error'}
                         </h3>
-                        <p className="text-gray-600 text-center mb-6">{dialogMessage}</p>
+                        <p className="text-white text-center mb-6">{dialogMessage}</p>
                         <button
                             onClick={() => setShowDialog(false)}
                             className={`w-full py-2 px-4 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
