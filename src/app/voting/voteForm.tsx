@@ -124,13 +124,17 @@ export default function VoteForm({ initialVideos }: Props) {
                             <button
                                 onClick={() => handleVote(streamerGroup.videos[0].id)}
                                 disabled={hasVoted}
-                                className={`flex-1 flex items-center p-3 sm:p-4 rounded-lg transition-all duration-200 ${
+                                className={`flex-1 flex items-center p-3 sm:p-4 rounded-lg transition-all duration-200 border-2 border-white ${
                                     streamerGroup.videos.some(v => v.id === voteId)
-                                        ? 'bg-[#9146FF] hover:bg-[#7F3FE0] border-2 border-white'
-                                        : 'bg-[#1F1F1F] hover:bg-[#2D2D2D] border-2 border-transparent'
+                                        ? 'bg-[#9146FF] hover:bg-[#7F3FE0]'
+                                        : 'bg-[#fdb000] hover:bg-[#e69f00]'
                                 }`}
                             >
-                                <h2 className="text-xl sm:text-2xl font-bold text-white flex-grow">
+                                <h2 className={`text-xl sm:text-2xl font-bold flex-grow ${
+                                    streamerGroup.videos.some(v => v.id === voteId)
+                                        ? 'text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]'
+                                        : 'text-[#1F1F1F]'
+                                }`}>
                                     Vote for {streamerGroup.streamer}
                                 </h2>
                                 {streamerGroup.videos.some(v => v.id === voteId) && (
