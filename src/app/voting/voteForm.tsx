@@ -108,7 +108,7 @@ export default function VoteForm({ initialVideos }: Props) {
     };
 
     return (
-        <div className="max-w-4xl mx-auto px-0 sm:px-6 py-8">
+        <div className="max-w-4xl mx-auto px-0 sm:px-6 py-8 mt-24 sm:mt-28">
             <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 sm:mb-8 md:mb-12 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">
                 Vote for The Pet Awards Clip of the Year!
             </h1>
@@ -124,17 +124,13 @@ export default function VoteForm({ initialVideos }: Props) {
                             <button
                                 onClick={() => handleVote(streamerGroup.videos[0].id)}
                                 disabled={hasVoted}
-                                className={`flex-1 flex items-center p-3 sm:p-4 rounded-lg transition-all duration-200 border-2 border-white ${
+                                className={`flex-1 flex items-center p-3 sm:p-4 rounded-lg transition-all duration-200 ${
                                     streamerGroup.videos.some(v => v.id === voteId)
-                                        ? 'bg-[#9146FF] hover:bg-[#7F3FE0]'
-                                        : 'bg-[#fdb000] hover:bg-[#e69f00]'
+                                        ? 'bg-[#9146FF] hover:bg-[#7F3FE0] border-2 border-white'
+                                        : 'bg-[#1F1F1F] hover:bg-[#2D2D2D] border-2 border-transparent'
                                 }`}
                             >
-                                <h2 className={`text-xl sm:text-2xl font-bold flex-grow ${
-                                    streamerGroup.videos.some(v => v.id === voteId)
-                                        ? 'text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]'
-                                        : 'text-[#1F1F1F]'
-                                }`}>
+                                <h2 className="text-xl sm:text-2xl font-bold text-white flex-grow">
                                     Vote for {streamerGroup.streamer}
                                 </h2>
                                 {streamerGroup.videos.some(v => v.id === voteId) && (
@@ -167,7 +163,7 @@ export default function VoteForm({ initialVideos }: Props) {
                                 className="bg-white rounded-lg shadow-lg border-x-0 sm:border border-gray-200 transition-all duration-200"
                             >
                                 <h3 className="text-xl font-semibold text-gray-900 px-6 pt-6 pb-4">
-                                    {video.Streamer} - {video.Name}
+                                    {video.Name}
                                 </h3>
                                 <div className="mx-0 sm:mx-6">
                                     <div className="relative pb-[75%] sm:pb-[66.67%] h-0">
