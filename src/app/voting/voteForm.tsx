@@ -108,8 +108,8 @@ export default function VoteForm({ initialVideos }: Props) {
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
-            <h1 className="text-6xl md:text-7xl font-extrabold text-white mb-12 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">
+        <div className="max-w-4xl mx-auto px-0 sm:px-6 py-8">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white mb-8 sm:mb-12 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">
                 Vote for The Pet Awards Clip of the Year!
             </h1>
             {hasVoted && (
@@ -120,7 +120,7 @@ export default function VoteForm({ initialVideos }: Props) {
             <div className="space-y-12">
                 {streamerVideos.map((streamerGroup) => (
                     <div key={streamerGroup.streamer} className="space-y-4">
-                        <div className="flex gap-4 items-center">
+                        <div className="flex gap-4 items-center px-4 sm:px-0">
                             <button
                                 onClick={() => handleVote(streamerGroup.videos[0].id)}
                                 disabled={hasVoted}
@@ -160,20 +160,23 @@ export default function VoteForm({ initialVideos }: Props) {
                         {streamerGroup.videos.map((video) => (
                             <div
                                 key={video.id}
-                                className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 transition-all duration-200"
+                                className="bg-white rounded-lg shadow-lg border-x-0 sm:border border-gray-200 transition-all duration-200"
                             >
-                                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                <h3 className="text-xl font-semibold text-gray-900 px-6 pt-6 pb-4">
                                     {video.Name}
                                 </h3>
-                                <div className="relative pb-[56.25%] h-0">
-                                    <iframe 
-                                        className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                        src={`https://clips.twitch.tv/embed?clip=${video.URLSlug}&parent=${hostname}&protocol=http`}
-                                        title={video.Name}
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    />
+                                <div className="mx-0 sm:mx-6">
+                                    <div className="relative pb-[75%] sm:pb-[66.67%] h-0">
+                                        <iframe 
+                                            className="absolute top-0 left-0 w-full h-full"
+                                            src={`https://clips.twitch.tv/embed?clip=${video.URLSlug}&parent=${hostname}&protocol=http`}
+                                            title={video.Name}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    </div>
                                 </div>
+                                <div className="h-6"></div>
                             </div>
                         ))}
                     </div>
