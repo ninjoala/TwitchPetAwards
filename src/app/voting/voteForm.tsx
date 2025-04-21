@@ -109,7 +109,9 @@ export default function VoteForm({ initialVideos }: Props) {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-            <h1 className="text-2xl font-bold text-white mb-8 text-center">Vote for Your Favorite Video</h1>
+            <h1 className="text-6xl md:text-7xl font-extrabold text-white mb-12 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">
+                Vote for The Pet Awards Clip of the Year!
+            </h1>
             {hasVoted && (
                 <div className="mb-8 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
                     <p className="text-green-700">You have already cast your vote. Thank you for participating!</p>
@@ -128,7 +130,7 @@ export default function VoteForm({ initialVideos }: Props) {
                             }`}
                         >
                             <h2 className="text-2xl font-bold text-white flex-grow">
-                                {streamerGroup.streamer}
+                                Vote for {streamerGroup.streamer}
                             </h2>
                             {streamerGroup.videos.some(v => v.id === voteId) && (
                                 <svg className="w-6 h-6 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
