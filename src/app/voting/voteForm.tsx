@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import supabase from "../data/database";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { SignInButton } from "@clerk/nextjs";
+import { SignInButton, SignOutButton } from "@clerk/nextjs";
 import { usePathname } from 'next/navigation';
 
 interface VideoEntry {
@@ -74,7 +74,7 @@ export default function VoteForm({ initialVideos }: Props) {
     }, [isSignedIn, userId]);
 
     const handleVote = (videoId: number) => {
-        if (!isSignedIn || hasVoted) return;
+        if (hasVoted) return;
         setVoteId(videoId === voteId ? null : videoId);
     };
 
@@ -122,7 +122,7 @@ export default function VoteForm({ initialVideos }: Props) {
                     <div key={streamerGroup.streamer} className="space-y-4">
                         <button
                             onClick={() => handleVote(streamerGroup.videos[0].id)}
-                            disabled={hasVoted || !isSignedIn}
+                            disabled={hasVoted}
                             className={`w-full flex items-center p-4 rounded-lg transition-all duration-200 ${
                                 streamerGroup.videos.some(v => v.id === voteId)
                                     ? 'bg-[#9146FF] hover:bg-[#7F3FE0] border-2 border-white'
@@ -163,12 +163,21 @@ export default function VoteForm({ initialVideos }: Props) {
             </div>
             
             <div className="mt-8 text-center">
-                {!isSignedIn ? (
+                {process.env.NODE_ENV === 'development' && isSignedIn && (
+                    <div className="mb-4">
+                        <SignOutButton>
+                            <button className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors duration-200">
+                                Sign Out (Dev Only)
+                            </button>
+                        </SignOutButton>
+                    </div>
+                )}
+                {!isSignedIn && voteId ? (
                     <div className="space-y-4">
-                        <p className="text-white">Please sign in to cast your vote</p>
+                        <p className="text-white text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Please sign in to submit your vote</p>
                         <SignInButton mode="modal" fallbackRedirectUrl={pathname}>
-                            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Sign in to vote
+                            <button className="bg-blue-500 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200">
+                                <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Sign in to vote</span>
                             </button>
                         </SignInButton>
                     </div>
@@ -179,10 +188,10 @@ export default function VoteForm({ initialVideos }: Props) {
                 ) : (
                     <button 
                         onClick={handleSubmit}
-                        disabled={!voteId}
-                        className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                        disabled={!voteId || !isSignedIn}
+                        className="bg-blue-500 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
-                        Submit Vote
+                        <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Submit Vote</span>
                     </button>
                 )}
             </div>
@@ -201,10 +210,10 @@ export default function VoteForm({ initialVideos }: Props) {
                                 </svg>
                             )}
                         </div>
-                        <h3 className={`text-xl font-bold text-center mb-2 ${dialogType === 'success' ? 'text-white' : 'text-red-600'}`}>
+                        <h3 className={`text-xl font-bold text-center mb-2 ${dialogType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
                             {dialogType === 'success' ? 'Success!' : 'Error'}
                         </h3>
-                        <p className="text-white text-center mb-6">{dialogMessage}</p>
+                        <p className="text-gray-800 text-center mb-6">{dialogMessage}</p>
                         <button
                             onClick={() => setShowDialog(false)}
                             className={`w-full py-2 px-4 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
