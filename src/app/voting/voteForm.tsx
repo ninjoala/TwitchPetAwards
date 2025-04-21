@@ -120,24 +120,42 @@ export default function VoteForm({ initialVideos }: Props) {
             <div className="space-y-12">
                 {streamerVideos.map((streamerGroup) => (
                     <div key={streamerGroup.streamer} className="space-y-4">
-                        <button
-                            onClick={() => handleVote(streamerGroup.videos[0].id)}
-                            disabled={hasVoted}
-                            className={`w-full flex items-center p-4 rounded-lg transition-all duration-200 ${
-                                streamerGroup.videos.some(v => v.id === voteId)
-                                    ? 'bg-[#9146FF] hover:bg-[#7F3FE0] border-2 border-white'
-                                    : 'bg-[#1F1F1F] hover:bg-[#2D2D2D] border-2 border-transparent'
-                            }`}
-                        >
-                            <h2 className="text-2xl font-bold text-white flex-grow">
-                                Vote for {streamerGroup.streamer}
-                            </h2>
+                        <div className="flex gap-4 items-center">
+                            <button
+                                onClick={() => handleVote(streamerGroup.videos[0].id)}
+                                disabled={hasVoted}
+                                className={`flex-1 flex items-center p-4 rounded-lg transition-all duration-200 ${
+                                    streamerGroup.videos.some(v => v.id === voteId)
+                                        ? 'bg-[#9146FF] hover:bg-[#7F3FE0] border-2 border-white'
+                                        : 'bg-[#1F1F1F] hover:bg-[#2D2D2D] border-2 border-transparent'
+                                }`}
+                            >
+                                <h2 className="text-2xl font-bold text-white flex-grow">
+                                    Vote for {streamerGroup.streamer}
+                                </h2>
+                                {streamerGroup.videos.some(v => v.id === voteId) && (
+                                    <svg className="w-6 h-6 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                )}
+                            </button>
                             {streamerGroup.videos.some(v => v.id === voteId) && (
-                                <svg className="w-6 h-6 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
+                                !isSignedIn ? (
+                                    <SignInButton mode="modal" fallbackRedirectUrl={pathname}>
+                                        <button className="bg-blue-500 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200">
+                                            <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Sign in to vote</span>
+                                        </button>
+                                    </SignInButton>
+                                ) : !hasVoted && (
+                                    <button 
+                                        onClick={handleSubmit}
+                                        className="bg-blue-500 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                    >
+                                        <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Submit Vote</span>
+                                    </button>
+                                )
                             )}
-                        </button>
+                        </div>
                         
                         {streamerGroup.videos.map((video) => (
                             <div
@@ -171,28 +189,6 @@ export default function VoteForm({ initialVideos }: Props) {
                             </button>
                         </SignOutButton>
                     </div>
-                )}
-                {!isSignedIn && voteId ? (
-                    <div className="space-y-4">
-                        <p className="text-white text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Please sign in to submit your vote</p>
-                        <SignInButton mode="modal" fallbackRedirectUrl={pathname}>
-                            <button className="bg-blue-500 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200">
-                                <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Sign in to vote</span>
-                            </button>
-                        </SignInButton>
-                    </div>
-                ) : hasVoted ? (
-                    <div className="space-y-4">
-                        <p className="text-white">You have already cast your vote</p>
-                    </div>
-                ) : (
-                    <button 
-                        onClick={handleSubmit}
-                        disabled={!voteId || !isSignedIn}
-                        className="bg-blue-500 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    >
-                        <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Submit Vote</span>
-                    </button>
                 )}
             </div>
 
