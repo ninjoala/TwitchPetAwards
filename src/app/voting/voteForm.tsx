@@ -108,33 +108,33 @@ export default function VoteForm({ initialVideos }: Props) {
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8">
-            <h1 className="text-6xl md:text-7xl font-extrabold text-white mb-12 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">
+        <div className="max-w-4xl mx-auto px-0 sm:px-6 py-8 mt-24 sm:mt-28">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 sm:mb-8 md:mb-12 text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]">
                 Vote for The Pet Awards Clip of the Year!
             </h1>
             {hasVoted && (
-                <div className="mb-8 p-4 bg-black/40 backdrop-blur-sm border border-white/20 rounded-lg text-center">
-                    <p className="text-white text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">You have already cast your vote. Thank you for participating!</p>
+                <div className="mb-6 sm:mb-8 p-4 bg-black/40 backdrop-blur-sm border border-white/20 rounded-lg text-center">
+                    <p className="text-white text-base sm:text-lg drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">You have already cast your vote. Thank you for participating!</p>
                 </div>
             )}
-            <div className="space-y-12">
+            <div className="space-y-8 sm:space-y-12">
                 {streamerVideos.map((streamerGroup) => (
                     <div key={streamerGroup.streamer} className="space-y-4">
-                        <div className="flex gap-4 items-center">
+                        <div className="flex flex-col lg:flex-row gap-4 items-stretch px-4 sm:px-0">
                             <button
                                 onClick={() => handleVote(streamerGroup.videos[0].id)}
                                 disabled={hasVoted}
-                                className={`flex-1 flex items-center p-4 rounded-lg transition-all duration-200 ${
+                                className={`flex-1 flex items-center p-3 sm:p-4 rounded-lg transition-all duration-200 ${
                                     streamerGroup.videos.some(v => v.id === voteId)
                                         ? 'bg-[#9146FF] hover:bg-[#7F3FE0] border-2 border-white'
                                         : 'bg-[#1F1F1F] hover:bg-[#2D2D2D] border-2 border-transparent'
                                 }`}
                             >
-                                <h2 className="text-2xl font-bold text-white flex-grow">
+                                <h2 className="text-xl sm:text-2xl font-bold text-white flex-grow">
                                     Vote for {streamerGroup.streamer}
                                 </h2>
                                 {streamerGroup.videos.some(v => v.id === voteId) && (
-                                    <svg className="w-6 h-6 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                     </svg>
                                 )}
@@ -142,14 +142,14 @@ export default function VoteForm({ initialVideos }: Props) {
                             {streamerGroup.videos.some(v => v.id === voteId) && (
                                 !isSignedIn ? (
                                     <SignInButton mode="modal" fallbackRedirectUrl={pathname}>
-                                        <button className="bg-blue-500 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200">
+                                        <button className="flex-1 bg-blue-500 hover:bg-blue-700 text-white text-lg sm:text-xl font-bold py-3 sm:py-4 px-6 sm:px-12 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200">
                                             <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Sign in to vote</span>
                                         </button>
                                     </SignInButton>
                                 ) : !hasVoted && (
                                     <button 
                                         onClick={handleSubmit}
-                                        className="bg-blue-500 hover:bg-blue-700 text-white text-xl font-bold py-4 px-8 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                        className="flex-1 bg-blue-500 hover:bg-blue-700 text-white text-lg sm:text-xl font-bold py-3 sm:py-4 px-6 sm:px-12 rounded-lg border-2 border-white/80 shadow-lg hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                     >
                                         <span className="drop-shadow-[0_2px_2px_rgba(0,0,0,0.4)]">Submit Vote</span>
                                     </button>
@@ -160,20 +160,23 @@ export default function VoteForm({ initialVideos }: Props) {
                         {streamerGroup.videos.map((video) => (
                             <div
                                 key={video.id}
-                                className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 transition-all duration-200"
+                                className="bg-white rounded-lg shadow-lg border-x-0 sm:border border-gray-200 transition-all duration-200"
                             >
-                                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                <h3 className="text-xl font-semibold text-gray-900 px-6 pt-6 pb-4">
                                     {video.Name}
                                 </h3>
-                                <div className="relative pb-[56.25%] h-0">
-                                    <iframe 
-                                        className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                        src={`https://clips.twitch.tv/embed?clip=${video.URLSlug}&parent=${hostname}&protocol=http`}
-                                        title={video.Name}
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    />
+                                <div className="mx-0 sm:mx-6">
+                                    <div className="relative pb-[75%] sm:pb-[66.67%] h-0">
+                                        <iframe 
+                                            className="absolute top-0 left-0 w-full h-full"
+                                            src={`https://clips.twitch.tv/embed?clip=${video.URLSlug}&parent=${hostname}&protocol=http`}
+                                            title={video.Name}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    </div>
                                 </div>
+                                <div className="h-6"></div>
                             </div>
                         ))}
                     </div>
