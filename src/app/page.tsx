@@ -54,21 +54,37 @@ async function readStream(stream: ReadableStream<Uint8Array>): Promise<string> {
 
 async function getVideoFiles() {
   console.log("Fetching video files...");
-  const fileNext = await GET();
-  return fileNext;
+  try {
+    const fileNext = await GET();
+    if (!fileNext || !fileNext.body) {
+      console.error('No response body from video files API');
+      return null;
+    }
+    return fileNext;
+  } catch (error) {
+    console.error('Error fetching video files:', error);
+    return null;
+  }
 }
 
 export default async function Home() {
   let linkVideos = await getVideos();
   const videoFilesResponse = await getVideoFiles();
-  if (videoFilesResponse.body != null) {
-    const videoFileString = await readStream(videoFilesResponse.body);
-    console.log(videoFileString);
-    const videoFiles = JSON.parse(videoFileString) as MetadataContent[];
-    console.log(videoFiles);
-    linkVideos = MapVideoFilename(linkVideos, videoFiles);
-    console.log(linkVideos);
-  }  
+  
+  if (videoFilesResponse && videoFilesResponse.body) {
+    try {
+      const videoFileString = await readStream(videoFilesResponse.body);
+      const videoFiles = JSON.parse(videoFileString) as MetadataContent[];
+      if (Array.isArray(videoFiles)) {
+        linkVideos = MapVideoFilename(linkVideos, videoFiles);
+      } else {
+        console.error('Video files response is not an array:', videoFiles);
+      }
+    } catch (error) {
+      console.error('Error processing video files:', error);
+    }
+  }
+  
   return (
     <main className="container mx-auto p-4">
       <VoteForm initialVideos={linkVideos} />
