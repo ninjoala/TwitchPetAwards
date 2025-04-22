@@ -181,7 +181,7 @@ export default function VoteForm({ initialVideos }: Props) {
                   className="bg-white rounded-lg shadow-lg border-x-0 sm:border border-gray-200 transition-all duration-200"
                 >
                   <h3 className="text-xl font-semibold text-gray-900 px-6 pt-3 pb-2">
-                    {video.Streamer} - {video.Name}
+                    /{video.Streamer} - {video.Name}
                   </h3>
                   <div className="mx-0 sm:mx-6 mb-4">
                     <div className="relative pb-[56.25%] h-0 bg-gray-100">
