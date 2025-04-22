@@ -114,7 +114,7 @@ export default function VoteForm({ initialVideos }: Props) {
             </p>
           </div>
         )}
-        <div className="space-y-8 sm:space-y-12">
+        <div className="space-y-8">
           {streamerVideos.map((streamerGroup) => (
             <div key={streamerGroup.streamer} className="space-y-4">
               <div className="flex flex-col lg:flex-row gap-4 items-stretch px-4 sm:px-0">
@@ -180,11 +180,11 @@ export default function VoteForm({ initialVideos }: Props) {
                   key={video.id}
                   className="bg-white rounded-lg shadow-lg border-x-0 sm:border border-gray-200 transition-all duration-200"
                 >
-                  <h3 className="text-xl font-semibold text-gray-900 px-6 pt-6 pb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 px-6 pt-3 pb-2">
                     {video.Streamer} - {video.Name}
                   </h3>
-                  <div className="mx-0 sm:mx-6">
-                    <div className="relative pb-[75%] sm:pb-[66.67%] h-0">
+                  <div className="mx-0 sm:mx-6 mb-4">
+                    <div className="relative pb-[56.25%] h-0">
                       {video.URLSlug ? (
                         <iframe
                           className="absolute top-0 left-0 w-full h-full"
@@ -194,17 +194,16 @@ export default function VoteForm({ initialVideos }: Props) {
                           allowFullScreen
                         />
                       ) : (
-                        <video controls>
+                        <video controls className="absolute top-0 left-0 w-full h-full">
                           <source
                             src={video.URLDisplay}
                             type="video/mp4"
-                            >
+                          >
                           </source>
                         </video>
                       )}
                     </div>
                   </div>
-                  <div className="h-6"></div>
                 </div>
               ))}
             </div>
