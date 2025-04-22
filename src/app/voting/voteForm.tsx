@@ -184,24 +184,26 @@ export default function VoteForm({ initialVideos }: Props) {
                     {video.Streamer} - {video.Name}
                   </h3>
                   <div className="mx-0 sm:mx-6 mb-4">
-                    <div className="relative pb-[56.25%] h-0">
-                      {video.URLSlug ? (
-                        <iframe
-                          className="absolute top-0 left-0 w-full h-full"
-                          src={`https://clips.twitch.tv/embed?clip=${video.URLSlug}&parent=${hostname}&protocol=http`}
-                          title={video.Name}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                        />
-                      ) : (
-                        <video controls className="absolute top-0 left-0 w-full h-full">
-                          <source
-                            src={video.URLDisplay}
-                            type="video/mp4"
-                          >
-                          </source>
-                        </video>
-                      )}
+                    <div className="relative pb-[56.25%] h-0 bg-gray-100">
+                      <div className="absolute top-0 left-0 w-full h-full">
+                        {video.URLSlug ? (
+                          <iframe
+                            className="w-full h-full"
+                            src={`https://clips.twitch.tv/embed?clip=${video.URLSlug}&parent=${hostname}&protocol=http`}
+                            title={video.Name}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        ) : (
+                          <video controls className="w-full h-full bg-black">
+                            <source
+                              src={video.URLDisplay}
+                              type="video/mp4"
+                            >
+                            </source>
+                          </video>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
