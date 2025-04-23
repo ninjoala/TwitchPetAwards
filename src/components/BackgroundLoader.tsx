@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 export default function BackgroundLoader() {
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // Load placeholder first
@@ -17,7 +16,6 @@ export default function BackgroundLoader() {
     const img = new Image();
     img.src = '/images/backgrounds/PETS-BG.jpg';
     img.onload = () => {
-      setIsLoaded(true);
       document.body.classList.add('loaded');
     };
   }, []);
