@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     siteName: 'The Pet Awards',
     images: [
       {
-        url: '/images/og-image.jpg',
+        url: 'https://thepetawards.tv/images/og-image001.jpg',
         width: 1200,
         height: 630,
         alt: 'The Pet Awards - Vote for your Favorite Pet Clip',
@@ -39,7 +39,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'The Pet Awards',
     description: 'Vote for your Favorite Pet Clip!',
-    images: ['/images/og-image.jpg'],
+    site: '@thepetawards',
+    images: ['https://thepetawards.tv/images/og-image001.jpg'],
   },
 };
 
