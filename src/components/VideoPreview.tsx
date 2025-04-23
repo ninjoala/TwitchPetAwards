@@ -126,6 +126,11 @@ export default function VideoPreview({ videoName, videoTitle, videoUrl, isLinkSu
                 <video
                   ref={videoRef}
                   controls
+                  playsInline
+                  webkit-playsinline="true"
+                  x5-playsinline="true"
+                  x5-video-player-type="h5"
+                  x5-video-player-fullscreen="true"
                   className="max-h-[70vh] w-full"
                   src={videoUrl}
                 >

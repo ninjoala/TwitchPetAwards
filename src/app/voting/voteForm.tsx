@@ -197,7 +197,7 @@ export default function VoteForm({ initialVideos }: Props) {
                         ) : (
                           <video controls className="w-full h-full bg-black">
                             <source
-                              src={video.URLDisplay}
+                              src={`${video.URLDisplay}#t=0.001`}
                               type="video/mp4"
                             >
                             </source>
