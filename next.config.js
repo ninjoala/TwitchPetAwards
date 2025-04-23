@@ -2,10 +2,29 @@
 const nextConfig = {
   output: 'standalone',
   images: {
-    domains: ['uploadthing.com', 'utfs.io'], // Allow Uploadthing domains for images
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'uploadthing.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'utfs.io',
+      }
+    ],
   },
   async headers() {
-    return [] // Temporarily remove all custom headers
+    return [
+      {
+        source: '/images/backgrounds/PETS-BG.jpg',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
 }
 
