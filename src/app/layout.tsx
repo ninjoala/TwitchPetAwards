@@ -15,6 +15,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'The Pet Awards',
   description: 'Vote for your Favorite Pet Clip!',
+  icons: {
+    icon: '/favicon.ico?v=2',
+  },
   openGraph: {
     title: 'The Pet Awards',
     description: 'Vote for your Favorite Pet Clip!',
