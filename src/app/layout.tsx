@@ -14,7 +14,32 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'The Pet Awards',
-  description: 'Submit your pet videos for The Pet Awards!',
+  description: 'Vote for your Favorite Pet Clip!',
+  icons: {
+    icon: '/favicon.ico?v=2',
+  },
+  openGraph: {
+    title: 'The Pet Awards',
+    description: 'Vote for your Favorite Pet Clip!',
+    url: 'https://thepetawards.tv',
+    siteName: 'The Pet Awards',
+    images: [
+      {
+        url: '/images/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'The Pet Awards - Vote for your Favorite Pet Clip',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The Pet Awards',
+    description: 'Vote for your Favorite Pet Clip!',
+    images: ['/images/og-image.jpg'],
+  },
 };
 
 export default function RootLayout({
