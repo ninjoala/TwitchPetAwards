@@ -5,6 +5,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
 import { ClerkProvider } from "@clerk/nextjs";
 import Image from "next/image";
+import BackgroundLoader from "@/components/BackgroundLoader";
 import "./globals.css";
 
 const inter = Inter({
@@ -51,6 +52,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${inter.variable} antialiased relative`}>
+          <BackgroundLoader />
           <div className="absolute top-4 right-4 w-24 sm:w-32 md:w-40">
             <Image
               src="/logo.png"
